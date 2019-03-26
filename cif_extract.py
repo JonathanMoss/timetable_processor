@@ -688,6 +688,6 @@ class CifExtract:
 
 if __name__ == "__main__":
 
-    cif_files = ['toc-full.cif', ]
+    cif_files = ['toc-update-sat.cif', 'toc-update-sun.cif', 'toc-update-mon.cif']
     for cif in cif_files:
         CifExtract(os.path.join(CifExtract.CIF_DIR, cif))

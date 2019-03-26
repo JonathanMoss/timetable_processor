@@ -3,6 +3,7 @@ import os
 import re
 from datetime import datetime
 import argparse
+import logging
 
 parser = argparse.ArgumentParser(description='Filter schedules for a given day into a table.')
 date_today = datetime.today().strftime('%Y-%m-%d')
@@ -12,9 +13,14 @@ parser.add_argument('-s', '--start', action='store',
                     help='Optional, CIF start date (YYYY-MM-DD), defaults to < schedule date', default=None)
 parser.add_argument('-e', '--end', action='store',
                     help='Optional, CIF end date (YYYY-MM-DD), defaults to > schedule date', default=None)
-parser.add_argument('-X', '--eXpired', action='store',
+parser.add_argument('-X', '--eXpired', action='store_true',
                     help='Remove expired schedules from the database.')
 args = parser.parse_args()
+
+logging.basicConfig(level=logging.DEBUG,
+                    filename='log.log',
+                    format='%(asctime)s - %(message)s',
+                    datefmt='%d-%b-%y %H:%M:%S')
 
 
 class CreateToday:
@@ -34,10 +40,12 @@ class CreateToday:
             except sqlite3.Error as e:
                 print(e)
         else:
-            print('Cannot find database file, exiting...')
+            logging.error('Cannot find database file, exiting...')
 
     @staticmethod
     def check_db_file(db_file):
+
+        """This function checks that the database file exists"""
         if os.path.isfile(db_file):
             return True
         else:
@@ -45,18 +53,28 @@ class CreateToday:
 
     @staticmethod
     def get_current_cif():
+
+        """This function returns the current CIF from the database"""
+
         db_conn = sqlite3.connect(CreateToday.CIF_DB)
         c = db_conn.cursor()
         c.execute('SELECT `txt_current_cif` FROM `tbl_current_cif` LIMIT 1;')
         return c.fetchone()[0]
 
     @staticmethod
-    def format_sql (sql_string):
-        """This method formats the sql by removing tabs and new lines."""
+    def format_sql(sql_string):
+
+        """This method formats the sql by removing multiple spaces and new lines."""
+
         return re.sub(r" {2,}|\n", "", sql_string.strip())
 
     def create_table(self):
+
+        """This method ensures that the relevant table is purged, ready for the new data"""
+
+        logging.debug('Clearing `tbl_current_schedule` from {}'.format(self.db_file))
         self.c.execute('DROP TABLE IF EXISTS `tbl_current_schedule`;')
+
         sql_string = """
         CREATE TABLE IF NOT EXISTS
             `tbl_current_schedule` (
@@ -86,13 +104,22 @@ class CreateToday:
         """
         self.c.execute(CreateToday.format_sql(sql_string))
         self.db_conn.commit()
-        print('`tbl_current_schedule` Created in {}'.format(self.db_file))
 
     def remove_expired_schedules(self):
 
-        pass
+        """This function removes schedules from the database that have expired"""
+
+        sql_string = """
+        DELETE FROM `tbl_basic_schedule` 
+        WHERE `tbl_basic_schedule`.`txt_end_date` < DATE('now')
+        """
+        self.c.execute(CreateToday.format_sql(sql_string))
+        self.db_conn.commit()
+        logging.debug('{} expired schedules removed'.format(self.c.rowcount))
 
     def get_current_schedules(self, cif_date=None, start_date=None, end_date=None):
+
+        """This function runs a query to return schedules valid in the specified date"""
 
         day_string = list('_______')
 
@@ -108,6 +135,8 @@ class CreateToday:
         else:
             cif_start_date = datetime.strptime(cif_date, '%Y-%m-%d')
             cif_end_date = datetime.strptime(cif_date, '%Y-%m-%d')
+
+        logging.debug('Getting valid schedules for {}'.format(cif_date))
 
         sql_string = """
             INSERT INTO 
@@ -132,9 +161,13 @@ class CreateToday:
 
         self.c.execute(CreateToday.format_sql(sql_string))
         self.db_conn.commit()
-        print('{} Schedules match into `tbl_current_schedule`'.format(self.c.rowcount))
+        logging.debug('{} Schedules match into `tbl_current_schedule`'.format(self.c.rowcount))
 
     def remove_duplicates(self):
+
+        """This function removes duplicate schedules, ensuring the correct versions are in the current schedule"""
+
+        logging.debug('Removing duplicate schedules from `tbl_current_schedule` in {}'.format(self.db_file))
 
         sql_string = """
             DELETE FROM 
@@ -151,12 +184,18 @@ class CreateToday:
         """
         self.c.execute(CreateToday.format_sql(sql_string))
         self.db_conn.commit()
-        print('{} duplicate schedules removed'.format(self.c.rowcount))
+        logging.debug('{} duplicate schedules removed'.format(self.c.rowcount))
 
 
 if __name__ == '__main__':
 
+    logging.debug('Running script to update `tbl_current_schedule`')
+    logging.debug('Script run with the following arguments...')
+    logging.debug(args)
     conn = CreateToday(CreateToday.get_current_cif())
+    if args.eXpired:
+        logging.debug('Attempting to remove expired schedules...')
+        conn.remove_expired_schedules()
     conn.create_table()
     conn.get_current_schedules(cif_date=args.date, start_date=args.start, end_date=args.end)
     conn.remove_duplicates()

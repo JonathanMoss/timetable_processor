@@ -111,7 +111,7 @@ class GetCif:
                 `txt_date_time`, 
                 `int_success`, 
                 `txt_arguments`) 
-            VALUES ("{}", datetime("now"), 1, '{}');""".format(self.downloaded_cif, str(arguments))
+            VALUES ("{}", datetime("now"), 1, "{}");""".format(self.downloaded_cif, str(arguments))
             sql_string = re.sub(r" {2,}|\n", "", sql_string.strip())
             conn = sqlite3.connect(GetCif.db_file_name)
             conn.execute(sql_string)
