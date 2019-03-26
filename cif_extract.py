@@ -513,7 +513,7 @@ class CifExtract:
                 # TODO: Either update in the DB or show as an overlay to the existing Association - need to clarify.
 
             # Update the database each 1000 records, or when complete (100% processed)
-            if (self.tot_assoc_records_processed and self.tot_assoc_records_processed % 1000 == 0) or (self.tot_assoc_records_processed == self.tot_assoc_records_in_cif):
+            if self.tot_assoc_records_processed and self.tot_assoc_records_processed % 1000 == 0:
                 for sql in assoc_string.split(';'):
                     self.db_conn.get_conn().execute(sql)  # process each SQL statement
                 self.db_conn.get_conn().execute('COMMIT')  # Commit into the database.
@@ -536,6 +536,11 @@ class CifExtract:
                                                                               records_left,
                                                                               time_left,
                                                                               est_time_to_complete))
+        # Make sure all remaining SQL statements have been processed
+        if assoc_string:
+            for sql in assoc_string.split(';'):
+                self.db_conn.get_conn().execute(sql)  # process each SQL statement
+            
         end_time = time.time()  # Stop the clock - log a summary.
         total_time = (end_time - start_time)
         if total_time <= 59:
@@ -550,7 +555,7 @@ class CifExtract:
                                                                           total_time / 60))
 
         if self.db_conn.get_conn().in_transaction:
-        	self.db_conn.get_conn().execute('COMMIT')  # Commit into the database.
+            self.db_conn.get_conn().execute('COMMIT')  # Commit into the database.
         self.get_schedules()
 
     def get_last_row(self, db_table):
@@ -683,6 +688,6 @@ class CifExtract:
 
 if __name__ == "__main__":
 
-    cif_files = ['toc-update-mon.cif', ]
+    cif_files = ['toc-full.cif', ]
     for cif in cif_files:
         CifExtract(os.path.join(CifExtract.CIF_DIR, cif))

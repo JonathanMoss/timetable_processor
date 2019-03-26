@@ -1,20 +1,26 @@
 import requests
-import os, shutil
+import os
+import shutil
 import sys
 import gzip
 from datetime import datetime, timedelta
 import argparse
 import sqlite3
+import re
 
 parser = argparse.ArgumentParser(description='Download CIF files from Network Rail.')
 group = parser.add_mutually_exclusive_group()
 group.add_argument('-f', '--full', action='store_true', help='Download full CIF')
 group.add_argument('-u', '--update', action='store_true', help='Download CIF update (default action)')
 parser.add_argument('-q', '--quiet', action='store_true', help='Suppress progress bar')
-parser.add_argument('-c', '--compressed', action='store_true', help='CIF remains compressed - not unzipped and placed into CIF folder')
-parser.add_argument('-d', '--day',choices=['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'], help='Override the automatic day selection (forces -u)')
-parser.add_argument('-k', '--keep', action='store_true', help='Do not delete the downloaded cif from "/tmp" after unzip operation')
+parser.add_argument('-c', '--compressed', action='store_true',
+                    help='CIF remains compressed - not unzipped and placed into CIF folder')
+parser.add_argument('-d', '--day',choices=['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'],
+                    help='Override the automatic day selection (forces -u)')
+parser.add_argument('-k', '--keep', action='store_true',
+                    help='Do not delete the downloaded cif from "/tmp" after unzip operation')
 args = parser.parse_args()
+
 
 class GetCif:
 
@@ -31,8 +37,8 @@ class GetCif:
         self.full_cif = full_cif
         self.show_progress = True
         self.downloaded_cif = ""
-        self.tmp_path  = ""
-        if cif_day == None:
+        self.tmp_path = ""
+        if cif_day is None:
             self.yesterday = datetime.today() - timedelta(days=1)
             self.yesterday = self.yesterday.strftime('%a').lower()
 
@@ -74,10 +80,13 @@ class GetCif:
             except Exception as e:
                 print(e)
 
-    def download_cif(self, args):
+    def download_cif(self, arguments):
 
         try:
-            with requests.get(GetCif.url, allow_redirects=True, params=self.params, auth=(GetCif.username, GetCif.password), stream=True) as r:
+            with requests.get(GetCif.url, 
+                              allow_redirects=True, 
+                              params=self.params, 
+                              auth=(GetCif.username, GetCif.password), stream=True) as r:
                 total_length = int(r.headers['Content-Length'])
                 dl = 0
                 with open(self.tmp_path, 'wb') as f:
@@ -96,13 +105,18 @@ class GetCif:
             print(e)
         finally:
             # Update Database
-            sql_string = 'INSERT into `tbl_downloaded_cif` (`txt_filename`, `txt_date_time`, `int_success`, `txt_arguments`) VALUES ("{}", datetime("now"), 1, "{}")'.format(self.downloaded_cif, str(args))
+            sql_string = """
+            INSERT into `tbl_downloaded_cif` 
+                (`txt_filename`, 
+                `txt_date_time`, 
+                `int_success`, 
+                `txt_arguments`) 
+            VALUES ("{}", datetime("now"), 1, '{}');""".format(self.downloaded_cif, str(arguments))
+            sql_string = re.sub(r" {2,}|\n", "", sql_string.strip())
             conn = sqlite3.connect(GetCif.db_file_name)
             conn.execute(sql_string)
             conn.commit()
             conn.close()
-
-        
 
     def unzip_file(self, keep=False):
 
@@ -128,7 +142,7 @@ if __name__ == '__main__':
         cif.show_progress = False
     else:
         cif.show_progress = True
-        
+
     cif.clear_folder()
     cif.download_cif(args)
     

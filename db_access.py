@@ -564,7 +564,7 @@ class DBConnection:
         """This method formats the sql by removing tabs and new lines."""
         return(re.sub(r" {2,}|\n", "", sql_string.strip()))
 
-    def create_current_table():
+    def create_current_table(self):
 
         sql_string = """
         CREATE TABLE 

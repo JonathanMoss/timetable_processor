@@ -6,12 +6,22 @@ import argparse
 
 parser = argparse.ArgumentParser(description='Filter schedules for a given day into a table.')
 date_today = datetime.today().strftime('%Y-%m-%d')
-parser.add_argument('-d', '--date', action='store', help='Optional, schedule date (YYYY-MM-DD), defaults to today', default=date_today)
-parser.add_argument('-s', '--start', action='store', help='Optional, CIF start date (YYYY-MM-DD), defaults to < schedule date', default=None)
-parser.add_argument('-e', '--end', action='store', help='Optional, CIF end date (YYYY-MM-DD), defaults to > schedule date', default=None)
+parser.add_argument('-d', '--date', action='store', help='Optional, schedule date (YYYY-MM-DD), defaults to today',
+                    default=date_today)
+parser.add_argument('-s', '--start', action='store',
+                    help='Optional, CIF start date (YYYY-MM-DD), defaults to < schedule date', default=None)
+parser.add_argument('-e', '--end', action='store',
+                    help='Optional, CIF end date (YYYY-MM-DD), defaults to > schedule date', default=None)
+parser.add_argument('-X', '--eXpired', action='store',
+                    help='Remove expired schedules from the database.')
 args = parser.parse_args()
 
+
 class CreateToday:
+
+    """This class provides the functionality to identify applicable and valid schedules for a given day"""
+
+    CIF_DB = './cif_record.db'  # The database file that contains CIF information.
 
     def __init__(self, db_file):
 
@@ -24,18 +34,26 @@ class CreateToday:
             except sqlite3.Error as e:
                 print(e)
         else:
-            print('Cannot find file, exiting...')
+            print('Cannot find database file, exiting...')
 
-    def check_db_file(self, db_file):
+    @staticmethod
+    def check_db_file(db_file):
         if os.path.isfile(db_file):
             return True
         else:
             return False
 
     @staticmethod
+    def get_current_cif():
+        db_conn = sqlite3.connect(CreateToday.CIF_DB)
+        c = db_conn.cursor()
+        c.execute('SELECT `txt_current_cif` FROM `tbl_current_cif` LIMIT 1;')
+        return c.fetchone()[0]
+
+    @staticmethod
     def format_sql (sql_string):
         """This method formats the sql by removing tabs and new lines."""
-        return(re.sub(r" {2,}|\n", "", sql_string.strip()))
+        return re.sub(r" {2,}|\n", "", sql_string.strip())
 
     def create_table(self):
         self.c.execute('DROP TABLE IF EXISTS `tbl_current_schedule`;')
@@ -69,6 +87,10 @@ class CreateToday:
         self.c.execute(CreateToday.format_sql(sql_string))
         self.db_conn.commit()
         print('`tbl_current_schedule` Created in {}'.format(self.db_file))
+
+    def remove_expired_schedules(self):
+
+        pass
 
     def get_current_schedules(self, cif_date=None, start_date=None, end_date=None):
 
@@ -131,9 +153,10 @@ class CreateToday:
         self.db_conn.commit()
         print('{} duplicate schedules removed'.format(self.c.rowcount))
 
+
 if __name__ == '__main__':
 
-    conn = CreateToday('/home/jmoss2/PycharmProjects/timetable_processor/DFROC2R(A)/DFROC2R(A).db')
+    conn = CreateToday(CreateToday.get_current_cif())
     conn.create_table()
     conn.get_current_schedules(cif_date=args.date, start_date=args.start, end_date=args.end)
     conn.remove_duplicates()
