@@ -4,7 +4,8 @@ def return_sql(tiploc):
     p = subprocess.Popen(['xclip','-selection','clipboard'], stdin=subprocess.PIPE)
 
     sql_string = """
-        SELECT     
+        SELECT
+            "TB" as Activity,     
             CASE
                 WHEN tbl_current_schedule.txt_stp_indicator = 'P' THEN 'WTT'
                 WHEN tbl_current_schedule.txt_stp_indicator = 'N' THEN 'STP'
@@ -39,6 +40,7 @@ def return_sql(tiploc):
                     (SELECT tbl_current_schedule.int_record_id FROM tbl_current_schedule)
         UNION
         SELECT 
+            "TF" AS Activity,
             CASE
                 WHEN tbl_current_schedule.txt_stp_indicator = 'P' THEN 'WTT'
                 WHEN tbl_current_schedule.txt_stp_indicator = 'N' THEN 'STP'
@@ -72,7 +74,8 @@ def return_sql(tiploc):
                 AND tbl_terminating.int_basic_schedule_id IN
                     (SELECT tbl_current_schedule.int_record_id FROM tbl_current_schedule)
         UNION
-        SELECT     
+        SELECT
+            "" as Activity,     
             CASE
                 WHEN tbl_current_schedule.txt_stp_indicator = 'P' THEN 'WTT'
                 WHEN tbl_current_schedule.txt_stp_indicator = 'N' THEN 'STP'
@@ -123,4 +126,4 @@ def return_sql(tiploc):
     print('Copied to Clipboard...')
 
 if __name__ == '__main__':
-    print(return_sql('PADTON'))
+    print(return_sql('LVRPLSH'))
