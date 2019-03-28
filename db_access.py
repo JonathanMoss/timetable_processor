@@ -30,13 +30,16 @@ class DBConnection:
         return_value = self.db_cursor.fetchall()
         return return_value
 
-    def execute_sql(self, sql_string, commit=False):
+    def execute_sql(self, sql_string, commit=False, last_row=False):
         
         self.get_cursor().execute(sql_string)
         if commit:
             self.get_conn().commit()
         row_count = self.get_cursor().rowcount
-        return row_count
+        if last_row:
+            return self.get_cursor().lastrowid
+        else:
+            return row_count
 
     def clear_table(self, table):
         
@@ -561,8 +564,8 @@ class DBConnection:
 
     @staticmethod
     def format_sql (sql_string):
-        """This method formats the sql by removing tabs and new lines."""
-        return(re.sub(r" {2,}|\n", "", sql_string.strip()))
+        """This method formats the sql by removing spaces and new lines."""
+        return re.sub(r" {2,}|\n", "", sql_string.strip())
 
     def create_current_table(self):
 

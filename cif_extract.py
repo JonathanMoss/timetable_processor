@@ -36,6 +36,7 @@ class CifExtract:
         self.db_conn = None
         self.cif_db_conn = None
         self.header_row_id = None
+        self.cif_record_header = None
 
         # TIPLOC INSERT RECORDS
         self.tot_tiploc_ins_in_cif = 0
@@ -55,6 +56,10 @@ class CifExtract:
         self.tot_rev_assoc_in_cif = 0
         self.tot_del_assoc_in_cif = 0
         self.tot_assoc_records_processed = 0
+
+        # SCHEDULES
+        self.tot_sch = 0
+        self.tot_sch_proc = 0
 
         # GENERAL PROCESSING
         self.full_cif = False
@@ -135,7 +140,7 @@ class CifExtract:
             if str(ret_records[0][0]).strip() == '0':
                 # No entry in cif_record.db, thus it has not been processed - update database...
                 logging.debug('CIF reference has not been processed, continuing...')
-                self.cif_db_conn.execute_sql(self.cif_db_conn.format_sql("""
+                self.cif_record_header = self.cif_db_conn.execute_sql(self.cif_db_conn.format_sql("""
                 INSERT INTO 
                     `tbl_header` ( 
                         `txt_mainframe_id`, 
@@ -156,7 +161,7 @@ class CifExtract:
                                                                                         update_indicator,
                                                                                         version,
                                                                                         start_date,
-                                                                                        end_date)), True)
+                                                                                        end_date)), True, last_row=True)
 
             else:
                 # The CIF reference has already been processed, check version...
@@ -188,7 +193,7 @@ class CifExtract:
                         logging.error('Attempting to process out of sequence CIF, cannot continue...')
                         exit()
                     else:
-                        self.cif_db_conn.execute_sql(self.cif_db_conn.format_sql("""INSERT INTO `tbl_header` 
+                        self.cif_record_header = self.cif_db_conn.execute_sql(self.cif_db_conn.format_sql("""INSERT INTO `tbl_header` 
                                         (`txt_mainframe_id`, 
                                         `txt_extract_date`, 
                                         `txt_extract_time`, 
@@ -207,7 +212,7 @@ class CifExtract:
                                                                                 update_indicator,
                                                                                 version,
                                                                                 start_date,
-                                                                                end_date)), True)
+                                                                                end_date)), True, last_row=True)
 
                 else:
                     # Same Reference, Same Version - has already been processed. 
@@ -598,15 +603,15 @@ class CifExtract:
         stdout, stderr = process.communicate()
         schedules = stdout.decode('utf-8')
                
-        index = self.get_last_row('tbl_basic_schedule') # Get the last row within the table.
+        index = self.get_last_row('tbl_basic_schedule')  # Get the last row within the table.
 
-        start_time = time.time() # Start the clock on the timer.
+        start_time = time.time()  # Start the clock on the timer.
 
         sql_string = ""
-        for line in schedules.splitlines(): # Iterate through each schedule line.
-            if re.match('^BS', line): # Basic Schedule match
-                index += 1 # Increment the index.
-                total_processed += 1 # Show the processed tally +1
+        for line in schedules.splitlines():  # Iterate through each schedule line.
+            if re.match('^BS', line):  # Basic Schedule match
+                index += 1  # Increment the index.
+                total_processed += 1  # Show the processed tally +1
 
                 # This ensures that we only commit to the database every 1000 records.
                 if index % 1000 == 0:
@@ -664,30 +669,61 @@ class CifExtract:
             logging.debug(
                 'Parsed {}/{} schedule records in {:.2f} MM:SS'.format(total_processed, schedule_count,
                                                                        total_time / 60))
+        self.tot_sch = schedule_count
+        self.tot_sch_proc = total_processed
+
+        self.success()
 
     def success(self):
 
         """This function inserts a record into the database that summarises both success and what was processed."""
 
-        # TIPLOC INSERT
-        self.tot_tiploc_ins_in_cif = 0
-        self.tiploc_ins_processed_count = 0
-        # TIPLOC AMMEND
-        self.tot_tiploc_amd_in_cif = 0
-        self.tot_tiploc_amd_processed = 0
-        # TIPLOC DELETE
-        self.tot_tiploc_del_in_cif = 0
-        self.tot_tiploc_del_processed = 0
-        # ASSOCIATION RECORDS
-        self.tot_assoc_records_in_cif = 0
-        self.tot_new_assoc_in_cif = 0
-        self.tot_rev_assoc_in_cif = 0
-        self.tot_del_assoc_in_cif = 0
-        self.tot_assoc_records_processed = 0
+        sql_string = """
+        UPDATE `tbl_header`
+        SET `int_complete` = 1
+        WHERE `int_record_id` = {};
+        
+        """.format(self.cif_record_header)
+        self.cif_db_conn.execute_sql(sql_string, True)
+
+        sql_string = """
+        INSERT INTO `tbl_header_stats`
+            (`int_header_record_id`,
+            `int_TI`,
+            `int_TI_proc`,
+            `int_TA`,
+            `int_TA_proc`,
+            `int_TD`,
+            `int_TD_proc`,
+            `int_AA_tot`,
+            `int_AA_new`,
+            `int_AA_del`,
+            `int_AA_rev`,
+            `int_AA_proc`,
+            `int_BS`,
+            `int_BS_proc`)
+        VALUES
+            ({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})
+            """.format(int(self.cif_record_header),
+                       int(self.tot_tiploc_ins_in_cif),
+                       int(self.tiploc_ins_processed_count),
+                       int(self.tot_tiploc_amd_in_cif),
+                       int(self.tot_tiploc_amd_processed),
+                       int(self.tot_tiploc_del_in_cif),
+                       int(self.tot_tiploc_del_processed),
+                       int(self.tot_assoc_records_in_cif),
+                       int(self.tot_new_assoc_in_cif),
+                       int(self.tot_rev_assoc_in_cif),
+                       int(self.tot_del_assoc_in_cif),
+                       int(self.tot_assoc_records_processed),
+                       int(self.tot_sch),
+                       int(self.tot_sch_proc))
+
+        self.cif_db_conn.execute_sql(sql_string, True)
 
 
 if __name__ == "__main__":
 
-    cif_files = ['toc-update-sat.cif', 'toc-update-sun.cif', 'toc-update-mon.cif']
+    cif_files = ['toc-update-tue.cif', 'toc-update-wed.cif']
     for cif in cif_files:
         CifExtract(os.path.join(CifExtract.CIF_DIR, cif))
