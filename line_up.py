@@ -35,7 +35,7 @@ def return_sql(tiploc):
             WHERE tbl_origin.txt_location_and_suffix LIKE '%{} %'
                 AND tbl_origin.int_basic_schedule_id = tbl_current_schedule.int_record_id
                 AND tbl_origin.int_basic_schedule_id = tbl_terminating.int_basic_schedule_id
-                AND tbl_origin.txt_wtt_dep_time >= time('now')
+                /*AND tbl_origin.txt_wtt_dep_time >= time('now')*/
                 AND tbl_origin.int_basic_schedule_id IN
                     (SELECT tbl_current_schedule.int_record_id FROM tbl_current_schedule)
         UNION
@@ -70,7 +70,7 @@ def return_sql(tiploc):
             WHERE tbl_terminating.txt_location_and_suffix LIKE '%{} %'
                 AND tbl_terminating.int_basic_schedule_id = tbl_current_schedule.int_record_id
                 AND tbl_terminating.int_basic_schedule_id = tbl_origin.int_basic_schedule_id
-                AND tbl_terminating.txt_wtt_arr_time >= time('now')
+                /*AND tbl_terminating.txt_wtt_arr_time >= time('now')*/
                 AND tbl_terminating.int_basic_schedule_id IN
                     (SELECT tbl_current_schedule.int_record_id FROM tbl_current_schedule)
         UNION
@@ -115,7 +115,7 @@ def return_sql(tiploc):
                 AND tbl_intermediate.int_basic_schedule_id = tbl_current_schedule.int_record_id
                 AND tbl_intermediate.int_basic_schedule_id = tbl_origin.int_basic_schedule_id
                 AND tbl_intermediate.int_basic_schedule_id = tbl_terminating.int_basic_schedule_id
-                AND SortTime >= time('now')
+                /*AND SortTime >= time('now')*/
                 AND tbl_intermediate.int_basic_schedule_id IN
                     (SELECT tbl_current_schedule.int_record_id FROM tbl_current_schedule)
         ORDER BY SortTime""".format(tiploc, tiploc, tiploc)
@@ -126,4 +126,4 @@ def return_sql(tiploc):
     print('Copied to Clipboard...')
 
 if __name__ == '__main__':
-    print(return_sql('LVRPLSH'))
+    print(return_sql('PADTON'))

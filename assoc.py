@@ -108,7 +108,7 @@ class AssociationEngine:
 
 
 if __name__ == '__main__':
-    assoc = AssociationEngine(fname='LVRPLSH.csv', location='LONDON PADDINGTON', header=False)
+    assoc = AssociationEngine(fname='PADTON.csv', location='LONDON PADDINGTON', header=False)
 
 
 # with open('PADTON.csv', newline='\n') as csvfile:
