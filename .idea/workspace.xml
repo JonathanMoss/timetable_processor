@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="e299f683-fc1e-4832-ade2-3e76491fb6c3" name="Default Changelist" comment="" />
+    <list default="true" id="e299f683-fc1e-4832-ade2-3e76491fb6c3" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cif_extract.py" beforeDir="false" afterPath="$PROJECT_DIR$/cif_extract.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cif_record.db" beforeDir="false" afterPath="$PROJECT_DIR$/cif_record.db" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/svg.py" beforeDir="false" afterPath="$PROJECT_DIR$/docker/svg.py" afterDir="false" />
+    </list>
     <ignored path="cif/" />
     <ignored path="DFROC2R(A)/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -14,7 +19,20 @@
     <favorites_list name="timetable_processor" />
   </component>
   <component name="FileEditorManager">
-    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300" />
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/cif_extract.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="540">
+              <caret line="726" column="81" selection-start-line="726" selection-start-column="81" selection-end-line="726" selection-end-column="81" />
+              <folding>
+                <element signature="e#19#36#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -80,11 +98,11 @@
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds">
-    <option name="x" value="-15" />
-    <option name="y" value="287" />
-    <option name="width" value="1892" />
-    <option name="height" value="1071" />
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="x" value="-1" />
+    <option name="y" value="25" />
+    <option name="width" value="1894" />
+    <option name="height" value="1068" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
@@ -102,6 +120,11 @@
             <path>
               <item name="timetable_processor" type="b2602c69:ProjectViewProjectNode" />
               <item name="timetable_processor" type="462c0819:PsiDirectoryNode" />
+              <item name="docker" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="timetable_processor" type="b2602c69:ProjectViewProjectNode" />
+              <item name="timetable_processor" type="462c0819:PsiDirectoryNode" />
               <item name="venv" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
@@ -112,12 +135,16 @@
     </panes>
   </component>
   <component name="PropertiesComponent">
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="com.intellij.ide.scratch.LRUPopupBuilder$1/New Scratch File" value="TEXT" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/DFROC2R(A)" />
     <property name="run.code.analysis.last.selected.profile" value="pProject Default" />
     <property name="settings.editor.selected.configurable" value="project.propVCSSupport.Ignored.Files" />
   </component>
   <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/docker" />
+    </key>
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$" />
     </key>
@@ -293,10 +320,10 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-15" y="287" width="1892" height="1071" extended-state="0" />
+    <frame x="-1" y="25" width="1602" height="876" extended-state="6" />
     <layout>
       <window_info id="Favorites" order="0" sideWeight="0.5011521" side_tool="true" weight="0.18263632" />
-      <window_info active="true" content_ui="combo" id="Project" order="1" sideWeight="0.49884793" visible="true" weight="0.21966863" />
+      <window_info active="true" content_ui="combo" id="Project" order="1" sideWeight="0.49884793" visible="true" weight="0.25681674" />
       <window_info id="Structure" order="2" side_tool="true" weight="0.25" />
       <window_info id="DB Browser" order="3" />
       <window_info id="Project Explorer" order="4" />
@@ -367,15 +394,15 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/line_up.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1875">
-          <caret line="128" column="30" selection-start-line="128" selection-start-column="30" selection-end-line="128" selection-end-column="30" />
+        <state relative-caret-position="676">
+          <caret line="128" column="28" selection-start-line="128" selection-start-column="28" selection-end-line="128" selection-end-column="28" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/today.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2580">
-          <caret line="177" selection-start-line="177" selection-end-line="177" />
+        <state relative-caret-position="1755">
+          <caret line="122" selection-start-line="122" selection-end-line="122" />
           <folding>
             <element signature="e#0#14#0" expanded="true" />
           </folding>
@@ -391,8 +418,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/get_cif.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1965">
-          <caret line="139" column="46" selection-start-line="139" selection-start-column="46" selection-end-line="139" selection-end-column="46" />
+        <state relative-caret-position="1755">
+          <caret line="125" column="49" selection-start-line="125" selection-start-column="49" selection-end-line="125" selection-end-column="49" />
           <folding>
             <element signature="e#0#15#0" expanded="true" />
           </folding>
@@ -403,16 +430,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2805">
           <caret line="187" selection-start-line="187" selection-end-line="187" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/cif_extract.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="10365">
-          <caret line="698" column="25" selection-start-line="698" selection-start-column="25" selection-end-line="698" selection-end-column="25" />
-          <folding>
-            <element signature="e#19#36#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -439,6 +456,16 @@
           <caret line="565" selection-start-line="565" selection-end-line="567" selection-end-column="58" />
           <folding>
             <element signature="e#0#14#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/cif_extract.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="540">
+          <caret line="726" column="81" selection-start-line="726" selection-start-column="81" selection-end-line="726" selection-end-column="81" />
+          <folding>
+            <element signature="e#19#36#0" expanded="true" />
           </folding>
         </state>
       </provider>

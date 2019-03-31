@@ -6,7 +6,7 @@ from datetimerange import DateTimeRange
 
 class SVGObject:
 
-	JSON = '{"platforms": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14], "start_time": "09:20", "end_time": "14:00"}'
+	JSON = '{"platforms": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14], "start_time": "00:00", "end_time": "23:59"}'
 	#JSON = '{"platforms": [1, 2, 3, 4, 5]}'
 	
 	def parse_platforms(self, json_string):
@@ -29,15 +29,22 @@ class SVGObject:
 		row_height = ((self.svg_height - bottom_border) - total_sep_pixels) / len(self.platforms)
 		y = 0
 		alt=True
+
+		blue_row = self.dwg.rect(id='blue_row', size=(self.svg_width, row_height), fill='blue', opacity='0.179')
+		green_row = self.dwg.rect(id='green_row', size=(self.svg_width, row_height), fill='green', opacity='0.179')
+		self.dwg.defs.add(blue_row)
+		self.dwg.defs.add(green_row)
 		
 		for platform in self.platforms:
 			
 			#Add background rectangle
 			if alt:
-				self.dwg.add(self.dwg.rect((0, y), (self.svg_width, row_height), fill='blue', opacity='0.179'))
+				#self.dwg.add(self.dwg.rect((0, y), (self.svg_width, row_height), fill='blue', opacity='0.179'))
+				self.dwg.add(self.dwg.use(blue_row, insert=(0, y)))
 				alt = False
 			else:
-				self.dwg.add(self.dwg.rect((0, y), (self.svg_width, row_height), fill='green', opacity='0.179'))
+				#self.dwg.add(self.dwg.rect((0, y), (self.svg_width, row_height), fill='green', opacity='0.179'))
+				self.dwg.add(self.dwg.use(green_row, insert=(0, y)))
 				alt = True
 
 			y += sep_line_height + row_height
@@ -99,6 +106,8 @@ class SVGObject:
 		print(y)
 		self.dwg.add(self.dwg.line(start=(y,0), end=(y, 505), stroke_width=2, stroke='blue', id='time_now'))
 
+	def return_string(self):
+		return self.svg_string
 
 	def __init__(self, filename='test.svg'):
 
@@ -107,16 +116,20 @@ class SVGObject:
 		self.filename = filename
 		self.ticks = 0
 		self.platforms = self.parse_platforms(SVGObject.JSON)
+		
 
 		self.dwg = svgwrite.Drawing(self.filename, (self.svg_width + 30, self.svg_height), profile='tiny')
+		self.platform_row = self.dwg.rect(size=(100,100), id='platform_row_bg', fill='blue', opacity='0.179')
+		self.dwg.defs.add(self.platform_row)
 		self.draw_platform_index()
 		self.start_time, self.end_time = self.parse_times(SVGObject.JSON)
-		self.draw_time_line(self.start_time, self.end_time)
+		#self.draw_time_line(self.start_time, self.end_time)
 		# self.dwg.add(self.dwg.rect((0,0), (100,100), stroke=svgwrite.rgb(10,10,16,'%'), fill='red'))
-		self.draw_time_now()
-		self.dwg.save(pretty=True)	
-
-
+		#self.draw_time_now()
+		self.dwg.add(self.dwg.use(self.platform_row, insert=(30,30)))
+		self.dwg.add(self.dwg.use(self.platform_row, insert=(50,100), fill='red'))
+		self.dwg.save(pretty=True)
+		self.svg_string = self.dwg.tostring()
 
 
 if __name__ == '__main__':
