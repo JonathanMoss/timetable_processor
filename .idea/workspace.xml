@@ -1,12 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="e299f683-fc1e-4832-ade2-3e76491fb6c3" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cif_extract.py" beforeDir="false" afterPath="$PROJECT_DIR$/cif_extract.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cif_record.db" beforeDir="false" afterPath="$PROJECT_DIR$/cif_record.db" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/svg.py" beforeDir="false" afterPath="$PROJECT_DIR$/docker/svg.py" afterDir="false" />
-    </list>
+    <list default="true" id="e299f683-fc1e-4832-ade2-3e76491fb6c3" name="Default Changelist" comment="" />
     <ignored path="cif/" />
     <ignored path="DFROC2R(A)/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -23,7 +18,7 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/cif_extract.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="540">
+            <state relative-caret-position="585">
               <caret line="726" column="81" selection-start-line="726" selection-start-column="81" selection-end-line="726" selection-end-column="81" />
               <folding>
                 <element signature="e#19#36#0" expanded="true" />
@@ -316,7 +311,14 @@
       <option name="project" value="LOCAL" />
       <updated>1553790416903</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="Complete re-write of association engine">
+      <created>1554064711551</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1554064711551</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -462,7 +464,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/cif_extract.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="540">
+        <state relative-caret-position="585">
           <caret line="726" column="81" selection-start-line="726" selection-start-column="81" selection-end-line="726" selection-end-column="81" />
           <folding>
             <element signature="e#19#36#0" expanded="true" />
