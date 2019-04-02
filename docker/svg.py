@@ -6,7 +6,8 @@ from datetimerange import DateTimeRange
 
 class SVGObject:
 
-	JSON = '{"platforms": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14], "start_time": "00:00", "end_time": "23:59"}'
+	JSON = '{"platforms": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14], "start_time": "00:00", "end_time": "23:00"}'
+	JSON = '{"platforms": [1, 2, 3, 4, 5, 6], "start_time": "00:00", "end_time": "23:00"}'
 	#JSON = '{"platforms": [1, 2, 3, 4, 5]}'
 	
 	def parse_platforms(self, json_string):
@@ -59,12 +60,15 @@ class SVGObject:
 	def draw_time_line(self, start_time, end_time):
 		
 		# Draw time line
-		self.main_dwg.add(self.main_dwg.line(start=(43, 520), end=(self.svg_width, 520), stroke_width=2, stroke='black'))
-		self.main_dwg.add(self.main_dwg.rect((36, 508), (self.svg_width - 26, 32), rx='5', ry='5', fill='yellow', opacity='0.179', stroke='black'))
+		bottom_border = 200
+		time_line_offset = 40
+		y = (self.svg_height - bottom_border) + time_line_offset
+		self.main_dwg.add(self.main_dwg.line(start=(self.index_svg_width + 10,  y), end=(self.main_svg_width - 10, y), stroke_width=2, stroke='black'))
+		self.main_dwg.add(self.main_dwg.rect((self.index_svg_width, y - 20), (self.main_svg_width - 120, 50), rx='5', ry='5', fill='yellow', opacity='0.179', stroke='black'))
 		time_range = DateTimeRange(start_time, end_time)
 		tm_between = end_time - start_time	
 		range_time = int(tm_between.total_seconds() / 60)  # Minutes between start and end time...
-		length = self.svg_width - 43
+		length = self.main_svg_width - 150
 
 		self.ticks = length / range_time
 
@@ -75,7 +79,7 @@ class SVGObject:
 		# 	self.main_dwg.add(self.main_dwg.text(hour, insert=(y-5, 538), fill='black', font_size='10px', font_weight='bold', font_family='Arial'))
 		# 	hour += 1
 
-		y = 43
+		x = self.index_svg_width + 10
 
 		for val in time_range.range(timedelta(minutes=1)):
 			
@@ -84,15 +88,15 @@ class SVGObject:
 					hr = '0{}'.format(str(val.hour))
 				else:
 					hr = str(val.hour)
-				self.main_dwg.add(self.main_dwg.line(start=(y, 510), end=(y, 530), stroke_width=2, stroke='red'))
-				self.main_dwg.add(self.main_dwg.text(hr, insert=(y-5, 538), fill='black', font_size='10px', font_weight='bold', font_family='Arial'))
+				self.main_dwg.add(self.main_dwg.line(start=(x, (y - 15)), end=(x, (y + 15)), stroke_width=2, stroke='red'))
+				self.main_dwg.add(self.main_dwg.text(hr, insert=(x - 5, y + 26), fill='black', font_size='10px', font_weight='bold', font_family='Arial'))
 			if str(val.minute) == '15' or str(val.minute) == '45':
-				self.main_dwg.add(self.main_dwg.line(start=(y, 515), end=(y, 525), stroke_width=2, stroke='black'))
+				self.main_dwg.add(self.main_dwg.line(start=(x, (y - 10)), end=(x, (y + 10)), stroke_width=2, stroke='black'))
 			if str(val.minute) == '30':
-				self.main_dwg.add(self.main_dwg.circle(center=(y, 520), r=4, fill='red'))
+				self.main_dwg.add(self.main_dwg.circle(center=(x, y), r=4, fill='red'))
 			if str(val.minute) in ('5', '10', '20', '25', '35', '40', '50', '55'):
-				self.main_dwg.add(self.main_dwg.line(start=(y, 518), end=(y, 522), stroke_width=1, stroke='black'))
-			y += self.ticks
+				self.main_dwg.add(self.main_dwg.line(start=(x, y - 3), end=(x, y + 3), stroke_width=1, stroke='black'))
+			x += self.ticks
 			
 	def draw_time_now(self):
 
@@ -100,13 +104,28 @@ class SVGObject:
 		start_time = self.start_time.replace(year=now.year, month=now.month, day=now.day)
 		tm_between = now - start_time
 		range_time = int(tm_between.total_seconds() / 60)	
-		y = self.ticks * range_time + 43
-		print(y)
-		self.main_dwg.add(self.main_dwg.line(start=(y,0), end=(y, 505), stroke_width=2, stroke='blue', id='time_now'))
+		x = self.ticks * range_time + self.index_svg_width + 10
+		
+		self.main_dwg.add(self.main_dwg.line(start=(x, 0), end=(x, 620), stroke_width=2, stroke='blue', id='time_now'))
+		self.scroll_to_pixels = x
 
-	def return_string(self):
-		return self.svg_string
+	def return_index_svg(self):
 
+		return self.index_dwg.tostring()
+
+	def return_main_svg(self):
+		return self.main_dwg.tostring()
+
+	def return_scroll_script(self):
+		script = """
+		<script>
+		
+				window.scrollTo({}, 0);
+			
+		
+		</script>
+		""".format(int(self.scroll_to_pixels))
+		return script
 
 	def create_platform_index(self):
 
@@ -154,9 +173,9 @@ class SVGObject:
 	def __init__(self):
 
 		self.main_svg_width = 3000  # Width of the svg layout
-		self.svg_height = 800 # Height of the svg layout.
+		self.svg_height = 600 # Height of the svg layout.
 		self.index_svg_width = 130 # Width of the platform index column
-
+		self.scroll_to_pixels = 0
 		self.ticks = 0  # Calcuation of ratio pixels to minutes.
 		self.platforms = self.parse_platforms(SVGObject.JSON)  # Get the platform details from the configuration
 		
@@ -165,12 +184,15 @@ class SVGObject:
 
 		self.create_platform_index()
 		self.draw_docker_background()
+		self.start_time, self.end_time = self.parse_times(SVGObject.JSON)
+		self.draw_time_line(self.start_time, self.end_time)
+		self.draw_time_now()
 		
 		# self.platform_row = self.main_dwg.rect(size=(100,100), id='platform_row_bg', fill='blue', opacity='0.179')
 		# self.main_dwg.defs.add(self.platform_row)
 		# self.draw_platform_index()
-		# self.start_time, self.end_time = self.parse_times(SVGObject.JSON)
-		#self.draw_time_line(self.start_time, self.end_time)
+		# 
+		
 		# self.main_dwg.add(self.main_dwg.rect((0,0), (100,100), stroke=svgwrite.rgb(10,10,16,'%'), fill='red'))
 		#self.draw_time_now()
 		# self.main_dwg.add(self.main_dwg.use(self.platform_row, insert=(30,30)))
