@@ -44,7 +44,7 @@ class SVGObject:
 
     def render_trains(self):
         for entry in self.trains:
-            if entry['a']:
+            if entry['a']:  # A train that arrives
                 a = datetime.strptime(entry['a'], '%H:%M:%S')
                 if entry['d']:
                     d = datetime.strptime(entry['d'], '%H:%M:%S')
@@ -65,13 +65,30 @@ class SVGObject:
                     width = dep_x - arr_x
 
                     for key, val in self.platform_bottom_line.items():
-                        print(key)
+
                         if str(key) == p.strip():
-                            print(p)
-                            self.main_dwg.add(self.main_dwg.rect((arr_x, val + 2), (width, 50), stroke='black', fill='none', stroke_width='1.5', rx=2, ry=2))
+
+                            self.main_dwg.add(self.main_dwg.rect((arr_x, val + 2), (width, self.row_height - 4), stroke='black', fill='#f45042', stroke_width='1.5', rx=8, ry=8))
                             text_x_pos = arr_x + 5
-                            self.main_dwg.add(self.main_dwg.text(h, insert=(text_x_pos, val + 25), font_size='12px', font_weight='bold', font_family='Arial'))
-        print(self.platform_bottom_line)
+                            self.main_dwg.add(self.main_dwg.text(h, insert=(text_x_pos, val + 15), fill='white', font_size='12px', font_weight='bold', font_family='Arial'))
+            else:  # A train that departs or passes
+                h = entry['id']
+                p = entry['plt']
+                d = datetime.strptime(entry['d'], '%H:%M:%S')
+                now = datetime.now()
+                departure_time = d.replace(year=now.year, month=now.month, day=now.day)
+                graph_start_time = self.start_time.replace(year=now.year, month=now.month, day=now.day)
+                tm_between_departure = departure_time - graph_start_time
+                range_dep = int(tm_between_departure.total_seconds() / 60)
+                dep_x = (self.ticks * range_dep) + 10   # Time the minutes * ticks.
+                width = 42
+                for key, val in self.platform_bottom_line.items():
+
+                        if str(key) == p.strip():
+                            self.main_dwg.add(self.main_dwg.rect((dep_x, val + 2), (width, self.row_height - 4), stroke='white', fill='#1f8417', stroke_width='2', rx=8, ry=8).dasharray([2, 2]))
+                            text_x_pos = dep_x + 5
+                            self.main_dwg.add(self.main_dwg.text(h, insert=(text_x_pos, val + 15), fill='white', font_size='12px', font_weight='bold', font_family='Arial'))
+
 
     @staticmethod
     def parse_platforms(json_string):
@@ -166,6 +183,8 @@ class SVGObject:
 
         # Plot time-line
         self.main_dwg.add(self.main_dwg.line(start=(x, 0), end=(x, self.svg_height - self.bottom_border), stroke_width=2, stroke='blue', id='time_now'))
+        time_string = now.strftime("%H:%M")
+        self.main_dwg.add(self.main_dwg.text(time_string, id="time_clock", insert=(x - 14, self.svg_height - self.bottom_border + 8.5), font_size='10px', font_weight='bold', font_family='Arial'))
 
     def return_index_svg(self):
         return self.index_dwg.tostring()
@@ -215,13 +234,13 @@ class SVGObject:
 
         js_string = """
         <script>
-
             function scroll_left() {{
                 // Scroll the current time line into view
                 var element = document.getElementById("main_div");
                 var maxScrollLeft = element.scrollWidth - element.clientWidth; // Get the maximum scrollable value
                 var x = (maxScrollLeft / 100) * {};  // Calculate the ratio value from the SVG
-                element.scrollLeft = x; // Scroll left
+                console.log(x);
+                element.scrollLeft = x + (element.clientWidth / 1.5); // Scroll left
             }};
         </script>""".format((100 / self.main_svg_width) * self.scroll_left)
         return re.sub(r" {2,}|\t", "", js_string.strip())    
@@ -235,14 +254,19 @@ class SVGObject:
             function scroll_tl(){{
                 var time_line = document.getElementById("time_now");
                 var start_time = new Date('{}');
-                  start_time.setYear(2019);
-                  start_time.setMonth(3, 3);
-                  var current_time = new Date();
-                 var diff = current_time - start_time;
-                  var minutes = Math.floor(diff / 1000 / 60);
-                  time_line.setAttribute('x1', minutes * {} + 10);
-                  time_line.setAttribute('x2', minutes * {} + 10);
-                  centre_timeline();
+                start_time.setYear(2019);
+                start_time.setMonth(3, 3);
+                var current_time = new Date();
+                var diff = current_time - start_time;
+                var minutes = Math.floor(diff / 1000 / 60);
+                time_line.setAttribute('x1', minutes * {} + 10);
+                time_line.setAttribute('x2', minutes * {} + 10);
+                var time_clock = document.getElementById("time_clock");
+                time_clock.setAttribute('x', minutes * {} - 2);
+                hh = current_time.getHours();
+                mm = current_time.getMinutes();
+                time_clock.textContent = hh + ":" + mm;
+                centre_timeline();
             }};
 
             function centre_timeline() {{
@@ -251,7 +275,7 @@ class SVGObject:
                       scroll_left();
                 }}    
             }};
-        </script>""".format(self.start_time, self.ticks, self.ticks)
+        </script>""".format(self.start_time, self.ticks, self.ticks, self.ticks)
 
         return re.sub(r" {2,}|\t", "", js_string.strip())
 
@@ -259,7 +283,7 @@ class SVGObject:
 
         self.start_time, self.end_time = self.parse_times(SVGObject.JSON)  # Get Start and End Times
         self.main_svg_width = 30000 # Width of the svg layout
-        self.svg_height = 900 # Height of the svg layout.
+        self.svg_height = 700 # Height of the svg layout.
         self.index_svg_width = 130 # Width of the platform index column
         self.ticks = 0  # Calcuation of ratio pixels to minutes.
         self.bottom_border = 75  # pixels at the bottom of the docker we keep for timeline.
