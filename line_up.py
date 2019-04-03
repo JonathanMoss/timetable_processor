@@ -126,4 +126,4 @@ def return_sql(tiploc):
     print('Copied to Clipboard...')
 
 if __name__ == '__main__':
-    print(return_sql('PADTON'))
+    print(return_sql('CREWE'))

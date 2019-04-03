@@ -2,7 +2,9 @@
 {% block content %}
 	<div class="content">
 		<div class="svg_index">{{ svg_index }}</div>
-		<div class="svg_main">{{ svg_main }}</div>
+		<div class="svg_main" id="main_div">{{ svg_main }}</div>
+		{{ svg_scroll_script }}
+		{{ auto_scroll_script }}
 	</div>
-	{{ scroll_js }}
+
 {% endblock content %}
