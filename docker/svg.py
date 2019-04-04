@@ -76,7 +76,6 @@ class SVGObject:
         self.main_dwg.add(self.main_dwg.rect((x, y + y_offset), (width, self.row_height - height_offset), stroke='white', fill='#1f8417', stroke_width='2', rx=8, ry=8).dasharray([2, 2]))
         self.main_dwg.add(self.main_dwg.text(identity, insert=(x + text_x_offset, y + text_y_offset), fill='white', font_size='12px', font_weight='bold', font_family='Arial'))
 
-    
     def draw_calling_train(self, arr_x, dep_x, y, width, identity):
 
         y_offset = 2
