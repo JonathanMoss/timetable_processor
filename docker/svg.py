@@ -35,59 +35,160 @@ class SVGObject:
         with open('CREWE.csv') as fl:
             for line in fl:
                 details = line.split(',')
-                headcode = details[1].strip()
-                platform = details[6].strip()
-                arrival_time = details[8].strip()
-                departure_time = details[9].strip()
+                activity = details[0].strip()
+                headcode = details[2].strip()
+                platform = details[7].strip()
+                arrival_time = details[9].strip()
+                departure_time = details[10].strip()
 
-                self.trains.append({'id': headcode, 'plt': platform, 'a': arrival_time, 'd': departure_time})
+                self.trains.append({'activity': activity, 'id': headcode, 'plt': platform, 'a': arrival_time, 'd': departure_time})
+
+    def return_x_coordinate(self, time):
+
+        offset = 10
+        now = datetime.now()
+        if not isinstance(time, datetime):
+            tm = datetime.strptime(time, '%H:%M:%S')
+        else:
+            tm = time
+        tm = tm.replace(year=now.year, month=now.month, day=now.day)
+        graph_start_time = self.start_time.replace(year=now.year, month=now.month, day=now.day)
+        tm_difference = tm - graph_start_time
+        range_time = int(tm_difference.total_seconds() / 60)
+        return (self.ticks * range_time) + offset
+
+    def return_y_coordinate(self, platform):
+
+        for key, val in self.platform_bottom_line.items():
+
+            if str(key) == platform.strip():
+                return val
+
+        return None  
+        
+    def draw_passing_train(self, x, y, width, identity):
+
+        y_offset = 2
+        height_offset = 4
+        text_x_offset = 5
+        text_y_offset = 15
+        
+        self.main_dwg.add(self.main_dwg.rect((x, y + y_offset), (width, self.row_height - height_offset), stroke='white', fill='#1f8417', stroke_width='2', rx=8, ry=8).dasharray([2, 2]))
+        self.main_dwg.add(self.main_dwg.text(identity, insert=(x + text_x_offset, y + text_y_offset), fill='white', font_size='12px', font_weight='bold', font_family='Arial'))
+
+    
+    def draw_calling_train(self, arr_x, dep_x, y, width, identity):
+
+        y_offset = 2
+        height_offset = 4
+        text_x_offset = 5
+        text_y_offset = 15
+
+        self.main_dwg.add(self.main_dwg.rect((arr_x, y + y_offset), (width, self.row_height - height_offset), stroke='white', fill='#f45042', stroke_width='2', rx=8, ry=8))
+        self.main_dwg.add(self.main_dwg.text(identity, insert=(arr_x + text_x_offset, y + text_y_offset), fill='white', font_size='12px', font_weight='bold', font_family='Arial'))
+
+    def draw_terminating_train(self, x, y, width, identity):
+
+        y_offset = 2
+        height_offset = 4
+        text_x_offset = 5
+        text_y_offset = 15
+
+        self.main_dwg.add(self.main_dwg.rect((x, y + y_offset), (width, self.row_height - height_offset), stroke='white', fill='yellow', stroke_width='2', rx=8, ry=8))
+        self.main_dwg.add(self.main_dwg.text(identity, insert=(x + text_x_offset, y + text_y_offset), fill='black', font_size='12px', font_weight='bold', font_family='Arial'))
+
+    def draw_starting_train(self, x, y, width, identity):
+
+        y_offset = 2
+        height_offset = 4
+        text_x_offset = 5
+        text_y_offset = 32
+
+        self.main_dwg.add(self.main_dwg.rect((x, y + y_offset), (width, self.row_height - height_offset), stroke='white', fill='grey', stroke_width='2', rx=8, ry=8))
+        self.main_dwg.add(self.main_dwg.text(identity, insert=(x + text_x_offset, y + text_y_offset), fill='pink', font_size='12px', font_weight='bold', font_family='Arial'))
 
     def render_trains(self):
+
         for entry in self.trains:
-            if entry['a']:  # A train that arrives
-                a = datetime.strptime(entry['a'], '%H:%M:%S')
-                if entry['d']:
-                    d = datetime.strptime(entry['d'], '%H:%M:%S')
-                if a and d:
-                    h = entry['id']
-                    p = entry['plt']
 
-                    now = datetime.now()  # Get the current time
-                    arrival_time = a.replace(year=now.year, month=now.month, day=now.day)  # Get the Docker start time.
-                    departure_time = d.replace(year=now.year, month=now.month, day=now.day)  # Get the Docker start time.
-                    graph_start_time = self.start_time.replace(year=now.year, month=now.month, day=now.day)
-                    tm_between_arrival = arrival_time - graph_start_time  # Calculate how long has passed from start time
-                    tm_between_departure = departure_time - graph_start_time
-                    range_arr = int(tm_between_arrival.total_seconds() / 60)  # Work out the total minutes.
-                    range_dep = int(tm_between_departure.total_seconds() / 60)
-                    arr_x = (self.ticks * range_arr) + 10   # Time the minutes * ticks.
-                    dep_x = (self.ticks * range_dep) + 10   # Time the minutes * ticks.
+            width = 40
+
+            if re.search('TF|TB', entry['activity']) is not None:
+                # Train either starts or terminates at the TIPLOC.
+                if entry['activity'].strip() == 'TF':
+                    # Train terminates at the location
+                    x = self.return_x_coordinate(entry['a'])
+                    y = self.return_y_coordinate(entry['plt'])
+                    id = entry['id'] 
+                    self.draw_terminating_train(x, y, width, id)
+                if entry['activity'].strip() == 'TB':
+                    # Train starts at the location
+                    x = self.return_x_coordinate(entry['d'])
+                    y = self.return_y_coordinate(entry['plt'])
+                    id = entry['id'] 
+                    self.draw_starting_train(x, y, width, id)
+
+            else:
+                if entry['a'].strip():
+                    arr_x = self.return_x_coordinate(entry['a'])
+                    dep_x = self.return_x_coordinate(entry['d'])
+                    y = self.return_y_coordinate(entry['plt'])
+                    id = entry['id']
                     width = dep_x - arr_x
+                    self.draw_calling_train(arr_x, dep_x, y, width, id)
 
-                    for key, val in self.platform_bottom_line.items():
+                else:
+                    # Train passes through
+                    x = self.return_x_coordinate(entry['d'])
+                    y = self.return_y_coordinate(entry['plt'])
+                    id = entry['id']
+                    self.draw_passing_train(x, y, width, id)
 
-                        if str(key) == p.strip():
+            # if entry['a']:  # An Arrival Time (Means the service calls at the TIPLOC)
+            #     a = datetime.strptime(entry['a'], '%H:%M:%S')
+            #     if entry['d']:
+            #         d = datetime.strptime(entry['d'], '%H:%M:%S')
+            #     if a and d:
+            #         h = entry['id']
+            #         p = entry['plt']
 
-                            self.main_dwg.add(self.main_dwg.rect((arr_x, val + 2), (width, self.row_height - 4), stroke='black', fill='#f45042', stroke_width='1.5', rx=8, ry=8))
-                            text_x_pos = arr_x + 5
-                            self.main_dwg.add(self.main_dwg.text(h, insert=(text_x_pos, val + 15), fill='white', font_size='12px', font_weight='bold', font_family='Arial'))
-            else:  # A train that departs or passes
-                h = entry['id']
-                p = entry['plt']
-                d = datetime.strptime(entry['d'], '%H:%M:%S')
-                now = datetime.now()
-                departure_time = d.replace(year=now.year, month=now.month, day=now.day)
-                graph_start_time = self.start_time.replace(year=now.year, month=now.month, day=now.day)
-                tm_between_departure = departure_time - graph_start_time
-                range_dep = int(tm_between_departure.total_seconds() / 60)
-                dep_x = (self.ticks * range_dep) + 10   # Time the minutes * ticks.
-                width = 42
-                for key, val in self.platform_bottom_line.items():
+            #         arr_x = self.return_x_coordinate(a)
+            #         dep_x = self.return_x_coordinate(d)
+            #         width = dep_x - arr_x
 
-                        if str(key) == p.strip():
-                            self.main_dwg.add(self.main_dwg.rect((dep_x, val + 2), (width, self.row_height - 4), stroke='white', fill='#1f8417', stroke_width='2', rx=8, ry=8).dasharray([2, 2]))
-                            text_x_pos = dep_x + 5
-                            self.main_dwg.add(self.main_dwg.text(h, insert=(text_x_pos, val + 15), fill='white', font_size='12px', font_weight='bold', font_family='Arial'))
+            #         for key, val in self.platform_bottom_line.items():
+
+            #             if str(key) == p.strip():
+
+            #                 self.main_dwg.add(self.main_dwg.rect((arr_x, val + 2), (width, self.row_height - 4), stroke='black', fill='#f45042', stroke_width='1.5', rx=8, ry=8))
+            #                 text_x_pos = arr_x + 5
+            #                 self.main_dwg.add(self.main_dwg.text(h, insert=(text_x_pos, val + 15), fill='white', font_size='12px', font_weight='bold', font_family='Arial'))
+            
+            # else:
+            #     if entry['activity']:
+            #         if entry['activity'].strip() == 'TF':
+            #             # Service starts at the location:
+            #             pass
+            #         else:
+            #             # Service
+
+            #     h = entry['id']
+            #     p = entry['plt']
+            #     print(h)
+            #     d = datetime.strptime(entry['d'], '%H:%M:%S')
+            #     now = datetime.now()
+            #     departure_time = d.replace(year=now.year, month=now.month, day=now.day)
+            #     graph_start_time = self.start_time.replace(year=now.year, month=now.month, day=now.day)
+            #     tm_between_departure = departure_time - graph_start_time
+            #     range_dep = int(tm_between_departure.total_seconds() / 60)
+            #     dep_x = (self.ticks * range_dep) + 10   # Time the minutes * ticks.
+            #     width = 42
+            #     for key, val in self.platform_bottom_line.items():
+
+            #             if str(key) == p.strip():
+            #                 self.main_dwg.add(self.main_dwg.rect((dep_x, val + 2), (width, self.row_height - 4), stroke='white', fill='#1f8417', stroke_width='2', rx=8, ry=8).dasharray([2, 2]))
+            #                 text_x_pos = dep_x + 5
+            #                 self.main_dwg.add(self.main_dwg.text(h, insert=(text_x_pos, val + 15), fill='white', font_size='12px', font_weight='bold', font_family='Arial'))
 
 
     @staticmethod
@@ -240,7 +341,7 @@ class SVGObject:
                 var maxScrollLeft = element.scrollWidth - element.clientWidth; // Get the maximum scrollable value
                 var x = (maxScrollLeft / 100) * {};  // Calculate the ratio value from the SVG
                 console.log(x);
-                element.scrollLeft = x + (element.clientWidth / 1.5); // Scroll left
+                element.scrollLeft = x + (element.clientWidth / 3.5); // Scroll left
             }};
         </script>""".format((100 / self.main_svg_width) * self.scroll_left)
         return re.sub(r" {2,}|\t", "", js_string.strip())    
@@ -255,7 +356,7 @@ class SVGObject:
                 var time_line = document.getElementById("time_now");
                 var start_time = new Date('{}');
                 start_time.setYear(2019);
-                start_time.setMonth(3, 3);
+                start_time.setMonth(3, 4);
                 var current_time = new Date();
                 var diff = current_time - start_time;
                 var minutes = Math.floor(diff / 1000 / 60);

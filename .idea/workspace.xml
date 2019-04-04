@@ -2,16 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e299f683-fc1e-4832-ade2-3e76491fb6c3" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/docker/CREWE.csv" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docker/static/clock.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cif_extract.py" beforeDir="false" afterPath="$PROJECT_DIR$/cif_extract.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cif_record.db" beforeDir="false" afterPath="$PROJECT_DIR$/cif_record.db" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docker/docker.py" beforeDir="false" afterPath="$PROJECT_DIR$/docker/docker.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docker/CREWE.csv" beforeDir="false" afterPath="$PROJECT_DIR$/docker/CREWE.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docker/svg.py" beforeDir="false" afterPath="$PROJECT_DIR$/docker/svg.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docker/templates/layout.html" beforeDir="false" afterPath="$PROJECT_DIR$/docker/templates/layout.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docker/templates/main.html" beforeDir="false" afterPath="$PROJECT_DIR$/docker/templates/main.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/line_up.py" beforeDir="false" afterPath="$PROJECT_DIR$/line_up.py" afterDir="false" />
     </list>
     <ignored path="cif/" />
     <ignored path="DFROC2R(A)/" />
@@ -41,7 +36,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/cif_extract.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="10890">
+            <state relative-caret-position="10785">
               <caret line="726" column="81" selection-start-line="726" selection-start-column="81" selection-end-line="726" selection-end-column="81" />
               <folding>
                 <element signature="e#19#36#0" expanded="true" />
@@ -53,8 +48,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/docker/svg.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1341">
-              <caret line="238" lean-forward="true" selection-start-line="238" selection-end-line="238" />
+            <state relative-caret-position="360">
+              <caret line="97" column="21" lean-forward="true" selection-start-line="97" selection-start-column="21" selection-end-line="97" selection-end-column="21" />
             </state>
           </provider>
         </entry>
@@ -138,7 +133,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -172,6 +166,7 @@
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -370,14 +365,22 @@
       <option name="project" value="LOCAL" />
       <updated>1554150290110</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="Complete re-write of association engine">
+      <created>1554305598520</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1554305598520</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="277" width="1920" height="1080" extended-state="6" />
+    <editor active="true" />
     <layout>
       <window_info id="Favorites" order="0" sideWeight="0.5011521" side_tool="true" weight="0.18263632" />
-      <window_info active="true" content_ui="combo" id="Project" order="1" sideWeight="0.49884793" visible="true" weight="0.21929362" />
+      <window_info content_ui="combo" id="Project" order="1" sideWeight="0.49884793" visible="true" weight="0.21929362" />
       <window_info id="Structure" order="2" side_tool="true" weight="0.25" />
       <window_info id="DB Browser" order="3" />
       <window_info id="Project Explorer" order="4" />
@@ -387,7 +390,7 @@
       <window_info anchor="bottom" id="Python Console" order="2" />
       <window_info anchor="bottom" id="Message" order="3" />
       <window_info anchor="bottom" id="Find" order="4" weight="0.32980132" />
-      <window_info anchor="bottom" id="Version Control" order="5" />
+      <window_info active="true" anchor="bottom" id="Version Control" order="5" visible="true" weight="0.3294979" />
       <window_info anchor="bottom" id="Run" order="6" visible="true" weight="0.25430465" />
       <window_info anchor="bottom" id="Debug" order="7" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="8" weight="0.25" />
@@ -514,6 +517,16 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/cif_extract.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="10785">
+          <caret line="726" column="81" selection-start-line="726" selection-start-column="81" selection-end-line="726" selection-end-column="81" />
+          <folding>
+            <element signature="e#19#36#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/docker/docker.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="240">
@@ -524,20 +537,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/cif_extract.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="10890">
-          <caret line="726" column="81" selection-start-line="726" selection-start-column="81" selection-end-line="726" selection-end-column="81" />
-          <folding>
-            <element signature="e#19#36#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/docker/svg.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1341">
-          <caret line="238" lean-forward="true" selection-start-line="238" selection-end-line="238" />
+        <state relative-caret-position="360">
+          <caret line="97" column="21" lean-forward="true" selection-start-line="97" selection-start-column="21" selection-end-line="97" selection-end-column="21" />
         </state>
       </provider>
     </entry>
