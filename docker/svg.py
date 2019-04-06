@@ -9,23 +9,43 @@ from datetimerange import DateTimeRange
 class SVGObject:
 
     # JSON = '{"platforms": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14], "start_time": "00:00", "end_time": "23:00"}'
+    PLATFORM_TYPE = {'1': ['Up Facing Bay', ],
+                     '2': ['Down Facing Bay', ],
+                     '3': ['Bi/Di Platform (Up)', ],
+                     '4': ['Bi/Di Platform (Down)', ],
+                     '5': ['Bi/Di Platform', ],
+                     '6': ['Up Platform', ],
+                     '7': ['Down Platform', ],
+                     '8': ['Bi/Di Running Line (Up)', ],
+                     '9': ['Bi/Di Running Line (Down)', ],
+                     '10': ['Running Line (Up)', ],
+                     '11': ['Running Line (Down)', ],
+                     '12': ['Bi/Di Passenger Loop', ],
+                     '13': ['Bi/Di Passenger Loop (Up)', ],
+                     '14': ['Bi/Di Passenger Loop (Down)', ],
+                     '15': ['Bi/Di Goods Loop', ],
+                     '16': ['Bi/Di Goods Loop (Up)', ],
+                     '17': ['Bi/Di Goods Loop (Down)', ],
+                     '18': ['Through Yard/Siding', ],
+                     '19': ['Yard/Siding', ]}
+
     JSON = '{"location" : "Crewe Station",' \
            '"platforms": [' \
-           '[1, "Platform 1"],' \
-           '[2, "Platform 2"],' \
-           '[3, "Platform 3"],' \
-           '[4, "Platform 4"],' \
-           '[5, "Platform 5"],' \
-           '["UFL", "Up Fast Line"],' \
-           '["DFL", "Down Fast Line"],' \
-           '[6, "Platform 6"],' \
-           '[7, "Platform 7"],' \
-           '[8, "Platform 8"],' \
-           '[9, "Platform 9"],' \
-           '[10, "Platform 10"],' \
-           '[11, "Platform 11"],' \
-           '["UDL", "Up & Dn Loop"],' \
-           '[12, "Platform 12"]], ' \
+           '[1, "Platform 1", 3, 311, 332, "PP"],' \
+           '[2, "Platform 2", 1, 159, "PP"],' \
+           '[3, "Platform 3", 1, 90, "PP"],' \
+           '[4, "Platform 4", 1, 132, "PP"],' \
+           '[5, "Platform 5", 5, 273, 256, "PP-A"],' \
+           '["UFL", "Up Fast Line", 8],' \
+           '["DFL", "Down Fast Line", 9],' \
+           '[6, "Platform 6", 5, 387, 446, "PP-A"],' \
+           '[7, "Platform 7", 1, 154, "PP"],' \
+           '[8, "Platform 8", 1, 116, "PP"],' \
+           '[9, "Platform 9", 2, 202, "PP"],' \
+           '[10, "Platform 10", 2, 80, "PP"],' \
+           '[11, "Platform 11", 5, 299, 308, "PP-A"],' \
+           '["UDL", "Up & Dn Loop", 12, 361, "PF"],' \
+           '[12, "Platform 12", 5, 424, 432, "PF-A"]], ' \
            '"start_time": "00:00", ' \
            '"end_time": "23:00"}'
 
