@@ -1,13 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="e299f683-fc1e-4832-ade2-3e76491fb6c3" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cif_extract.py" beforeDir="false" afterPath="$PROJECT_DIR$/cif_extract.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cif_record.db" beforeDir="false" afterPath="$PROJECT_DIR$/cif_record.db" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docker/CREWE.csv" beforeDir="false" afterPath="$PROJECT_DIR$/docker/CREWE.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docker/svg.py" beforeDir="false" afterPath="$PROJECT_DIR$/docker/svg.py" afterDir="false" />
-    </list>
+    <list default="true" id="e299f683-fc1e-4832-ade2-3e76491fb6c3" name="Default Changelist" comment="" />
     <ignored path="cif/" />
     <ignored path="DFROC2R(A)/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -357,12 +351,18 @@
       <option name="project" value="LOCAL" />
       <updated>1554305598520</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="Added configuration for Platform information - length, PP etc..">
+      <created>1554550705084</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1554550705084</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="ToolWindowManager">
     <frame x="-1" y="25" width="1602" height="876" extended-state="6" />
-    <editor active="true" />
     <layout>
       <window_info id="Favorites" order="0" sideWeight="0.5011521" side_tool="true" weight="0.18263632" />
       <window_info content_ui="combo" id="Project" order="1" sideWeight="0.49884793" visible="true" weight="0.25681674" />
@@ -391,7 +391,8 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Initial." />
     <MESSAGE value="Complete re-write of association engine" />
-    <option name="LAST_COMMIT_MESSAGE" value="Complete re-write of association engine" />
+    <MESSAGE value="Added configuration for Platform information - length, PP etc.." />
+    <option name="LAST_COMMIT_MESSAGE" value="Added configuration for Platform information - length, PP etc.." />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/TIPLOC_INSERT.csv" />

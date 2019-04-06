@@ -347,6 +347,7 @@ class SVGObject:
 
             # Add text label
             self.index_dwg.add(self.index_dwg.text(platform[1], insert=(10, (y - text_y_offset)), class_='platform_text'))
+            self.index_dwg.add(self.index_dwg.image('/static/up_bay.png', insert=(40, y)))
     
     def return_scroll_left(self):
 
