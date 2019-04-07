@@ -726,7 +726,7 @@ if __name__ == "__main__":
 
     # cif_files = ['toc-full.cif', 'toc-update-sat.cif', 'toc-update-sun.cif', 'toc-update-mon.cif', 'toc-update-tue.cif']
     # cif_files = ['toc-update-sat.cif', 'toc-update-sun.cif', 'toc-update-mon.cif']
-    cif_files = ['toc-update-wed.cif', ]
+    cif_files = ['toc-full.cif', 'toc-update-sat.cif', ]
     for cif in cif_files:
         print('Processing {}'.format(cif))
         CifExtract(os.path.join(CifExtract.CIF_DIR, cif))

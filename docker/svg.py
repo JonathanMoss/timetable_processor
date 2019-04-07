@@ -9,43 +9,48 @@ from datetimerange import DateTimeRange
 class SVGObject:
 
     # JSON = '{"platforms": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14], "start_time": "00:00", "end_time": "23:00"}'
-    PLATFORM_TYPE = {'1': ['Up Facing Bay', ],
-                     '2': ['Down Facing Bay', ],
-                     '3': ['Bi/Di Platform (Up)', ],
-                     '4': ['Bi/Di Platform (Down)', ],
-                     '5': ['Bi/Di Platform', ],
-                     '6': ['Up Platform', ],
-                     '7': ['Down Platform', ],
-                     '8': ['Bi/Di Running Line (Up)', ],
-                     '9': ['Bi/Di Running Line (Down)', ],
-                     '10': ['Running Line (Up)', ],
-                     '11': ['Running Line (Down)', ],
-                     '12': ['Bi/Di Passenger Loop', ],
-                     '13': ['Bi/Di Passenger Loop (Up)', ],
-                     '14': ['Bi/Di Passenger Loop (Down)', ],
-                     '15': ['Bi/Di Goods Loop', ],
-                     '16': ['Bi/Di Goods Loop (Up)', ],
-                     '17': ['Bi/Di Goods Loop (Down)', ],
-                     '18': ['Through Yard/Siding', ],
-                     '19': ['Yard/Siding', ]}
+    PLATFORM_TYPE = {'1': ['Up Facing Bay - Left hand platform', ],
+                     '2': ['Up Facing Bay - Right hand platform', ],
+                     '3': ['Down Facing Bay - Left hand platform', ],
+                     '4': ['Down Facing Bay - Right hand platform', ],
+                     '5': ['Bi/Di Platform (Up) - Left hand platform', ],
+                     '6': ['Bi/Di Platform (Up) - Right hand platform', ],
+                     '7': ['Bi/Di Platform (Down) - Left hand platform', ],
+                     '8': ['Bi/Di Platform (Down) - Right hand platform', ],
+                     '9': ['Bi/Di Platform - Left hand platform', ],
+                     '10': ['Bi/Di Platform - Right hand platform', ],
+                     '11': ['Up Platform', ],
+                     '12': ['Down Platform', ],
+                     '13': ['Bi/Di Running Line (Up)', ],
+                     '14': ['Bi/Di Running Line (Down)', ],
+                     '15': ['Running Line (Up)', ],
+                     '16': ['Running Line (Down)', ],
+                     '17': ['Bi/Di Passenger Loop', ],
+                     '18': ['Bi/Di Passenger Loop (Up)', ],
+                     '19': ['Bi/Di Passenger Loop (Down)', ],
+                     '20': ['Bi/Di Goods Loop', ],
+                     '21': ['Bi/Di Goods Loop (Up)', ],
+                     '22': ['Bi/Di Goods Loop (Down)', ],
+                     '24': ['Through Yard/Siding', ],
+                     '24': ['Yard/Siding', ]}
 
     JSON = '{"location" : "Crewe Station",' \
            '"platforms": [' \
-           '[1, "Platform 1", 3, 311, 332, "PP"],' \
+           '[1, "Platform 1", 10, 311, 332, "PP"],' \
            '[2, "Platform 2", 1, 159, "PP"],' \
            '[3, "Platform 3", 1, 90, "PP"],' \
-           '[4, "Platform 4", 1, 132, "PP"],' \
-           '[5, "Platform 5", 5, 273, 256, "PP-A"],' \
-           '["UFL", "Up Fast Line", 8],' \
-           '["DFL", "Down Fast Line", 9],' \
-           '[6, "Platform 6", 5, 387, 446, "PP-A"],' \
+           '[4, "Platform 4", 2, 132, "PP"],' \
+           '[5, "Platform 5", 9, 273, 256, "PP-A"],' \
+           '["UFL", "Up Fast Line", 13],' \
+           '["DFL", "Down Fast Line", 14],' \
+           '[6, "Platform 6", 10, 387, 446, "PP-A"],' \
            '[7, "Platform 7", 1, 154, "PP"],' \
-           '[8, "Platform 8", 1, 116, "PP"],' \
-           '[9, "Platform 9", 2, 202, "PP"],' \
-           '[10, "Platform 10", 2, 80, "PP"],' \
-           '[11, "Platform 11", 5, 299, 308, "PP-A"],' \
-           '["UDL", "Up & Dn Loop", 12, 361, "PF"],' \
-           '[12, "Platform 12", 5, 424, 432, "PF-A"]], ' \
+           '[8, "Platform 8", 2, 116, "PP"],' \
+           '[9, "Platform 9", 4, 202, "PP"],' \
+           '[10, "Platform 10", 3, 80, "PP"],' \
+           '[11, "Platform 11", 9, 299, 308, "PP-A"],' \
+           '["UDL", "Up & Dn Loop", 17, 361, "PF"],' \
+           '[12, "Platform 12", 10, 424, 432, "PF-A"]], ' \
            '"start_time": "00:00", ' \
            '"end_time": "23:00"}'
 
@@ -163,53 +168,6 @@ class SVGObject:
                     id = entry['id']
                     self.draw_passing_train(x, y, width, id)
 
-            # if entry['a']:  # An Arrival Time (Means the service calls at the TIPLOC)
-            #     a = datetime.strptime(entry['a'], '%H:%M:%S')
-            #     if entry['d']:
-            #         d = datetime.strptime(entry['d'], '%H:%M:%S')
-            #     if a and d:
-            #         h = entry['id']
-            #         p = entry['plt']
-
-            #         arr_x = self.return_x_coordinate(a)
-            #         dep_x = self.return_x_coordinate(d)
-            #         width = dep_x - arr_x
-
-            #         for key, val in self.platform_bottom_line.items():
-
-            #             if str(key) == p.strip():
-
-            #                 self.main_dwg.add(self.main_dwg.rect((arr_x, val + 2), (width, self.row_height - 4), stroke='black', fill='#f45042', stroke_width='1.5', rx=8, ry=8))
-            #                 text_x_pos = arr_x + 5
-            #                 self.main_dwg.add(self.main_dwg.text(h, insert=(text_x_pos, val + 15), fill='white', font_size='12px', font_weight='bold', font_family='Arial'))
-            
-            # else:
-            #     if entry['activity']:
-            #         if entry['activity'].strip() == 'TF':
-            #             # Service starts at the location:
-            #             pass
-            #         else:
-            #             # Service
-
-            #     h = entry['id']
-            #     p = entry['plt']
-            #     print(h)
-            #     d = datetime.strptime(entry['d'], '%H:%M:%S')
-            #     now = datetime.now()
-            #     departure_time = d.replace(year=now.year, month=now.month, day=now.day)
-            #     graph_start_time = self.start_time.replace(year=now.year, month=now.month, day=now.day)
-            #     tm_between_departure = departure_time - graph_start_time
-            #     range_dep = int(tm_between_departure.total_seconds() / 60)
-            #     dep_x = (self.ticks * range_dep) + 10   # Time the minutes * ticks.
-            #     width = 42
-            #     for key, val in self.platform_bottom_line.items():
-
-            #             if str(key) == p.strip():
-            #                 self.main_dwg.add(self.main_dwg.rect((dep_x, val + 2), (width, self.row_height - 4), stroke='white', fill='#1f8417', stroke_width='2', rx=8, ry=8).dasharray([2, 2]))
-            #                 text_x_pos = dep_x + 5
-            #                 self.main_dwg.add(self.main_dwg.text(h, insert=(text_x_pos, val + 15), fill='white', font_size='12px', font_weight='bold', font_family='Arial'))
-
-
     @staticmethod
     def parse_platforms(json_string):
 
@@ -320,7 +278,7 @@ class SVGObject:
         total_sep_pixels = self.seperator_line_height * total_sep  # How many pixels are taken up by the separator
         # The height of each row.
         self.row_height = ((self.svg_height - self.bottom_border) - total_sep_pixels) / len(self.platforms)
-        text_y_offset = 20  # The amount of y offset for platform text.
+        text_y_offset = -25  # The amount of y offset for platform text.
 
         y = 0
         alt = True  # Boolean used to alternate row colors.
@@ -343,12 +301,28 @@ class SVGObject:
 
             self.platform_bottom_line.update({platform[0]: y})
 
-            y += self.seperator_line_height + self.row_height
-
             # Add text label
             self.index_dwg.add(self.index_dwg.text(platform[1], insert=(10, (y - text_y_offset)), class_='platform_text'))
-            self.index_dwg.add(self.index_dwg.image('/static/up_bay.png', insert=(40, y)))
-    
+            img = self.index_dwg.image('/static/{}.png'.format(platform[2]), insert=(130, y + 10), height=20)
+            
+            try:
+
+                length = platform[3]
+                try:
+                    length_down = int(platform[4])
+                except Exception as ex:
+                    title_text = 'Length: {}m [{}]'.format(length, platform[4])
+                else:
+                    title_text = 'Length (UP): {}m, (DOWN): {}m [{}]'.format(length, length_down, platform[5])
+            except Exception as e:
+                pass
+            else:
+                img.set_desc(title=title_text)
+            finally:
+                self.index_dwg.add(img)
+
+            y += self.seperator_line_height + self.row_height
+
     def return_scroll_left(self):
 
         # This function provides JS to scroll the current time line into view.
@@ -360,8 +334,7 @@ class SVGObject:
                 var element = document.getElementById("main_div");
                 var maxScrollLeft = element.scrollWidth - element.clientWidth; // Get the maximum scrollable value
                 var x = (maxScrollLeft / 100) * {};  // Calculate the ratio value from the SVG
-                console.log(x);
-                element.scrollLeft = x + (element.clientWidth / 3.5); // Scroll left
+                element.scrollLeft = x + (element.clientWidth / 2); // Scroll left
             }};
         </script>""".format((100 / self.main_svg_width) * self.scroll_left)
         return re.sub(r" {2,}|\t", "", js_string.strip())    
@@ -375,17 +348,18 @@ class SVGObject:
             function scroll_tl(){{
                 var time_line = document.getElementById("time_now");
                 var start_time = new Date('{}');
-                start_time.setYear(2019);
-                start_time.setMonth(3, 4);
-                var current_time = new Date();
+            	var current_time = new Date();
+                start_time.setFullYear(current_time.getFullYear());
+                start_time.setMonth(current_time.getMonth());
+                start_time.setDate(current_time.getDate());
                 var diff = current_time - start_time;
                 var minutes = Math.floor(diff / 1000 / 60);
                 time_line.setAttribute('x1', minutes * {} + 10);
                 time_line.setAttribute('x2', minutes * {} + 10);
                 var time_clock = document.getElementById("time_clock");
                 time_clock.setAttribute('x', minutes * {} - 2);
-                hh = current_time.getHours();
-                mm = current_time.getMinutes();
+                hh = ("0" + current_time.getHours()).slice(-2);
+                mm = ("0" + current_time.getMinutes()).slice(-2);
                 time_clock.textContent = hh + ":" + mm;
                 centre_timeline();
             }};
@@ -405,7 +379,7 @@ class SVGObject:
         self.start_time, self.end_time = self.parse_times(SVGObject.JSON)  # Get Start and End Times
         self.main_svg_width = 30000 # Width of the svg layout
         self.svg_height = 700 # Height of the svg layout.
-        self.index_svg_width = 130 # Width of the platform index column
+        self.index_svg_width = 160 # Width of the platform index column
         self.ticks = 0  # Calcuation of ratio pixels to minutes.
         self.bottom_border = 75  # pixels at the bottom of the docker we keep for timeline.
         self.platforms = self.parse_platforms(SVGObject.JSON)  # Get the platform details from the configuration
