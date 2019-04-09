@@ -74,15 +74,18 @@ class SVGObject:
                 schedule = details[1].strip()
                 line_out = details[8].strip()
                 uid = details[3].strip()
+                toc = details[12].strip()
+                dt = details[13].strip()
+                at = details[14].strip()
 
-                self.trains.append({'lo': line_out, 'schedule': schedule, 'activity': activity, 'id': headcode, 'plt': platform, 'a': arrival_time, 'd': departure_time, 'o': origin, 'dest': dest})
+                #self.trains.append({'lo': line_out, 'schedule': schedule, 'activity': activity, 'id': headcode, 'plt': platform, 'a': arrival_time, 'd': departure_time, 'o': origin, 'dest': dest})
 
                 try:
                     pl = self.train_service_dict[platform]
-                    pl.update({uid: {'plt': platform, 'lo': line_out, 'schedule': schedule, 'activity': activity, 'id': headcode, 'a': arrival_time, 'd': departure_time, 'o': origin, 'dest': dest}})
+                    pl.update({uid: {'uid': uid, 'toc': toc, 'dt': dt, 'at': at, 'plt': platform, 'lo': line_out, 'schedule': schedule, 'activity': activity, 'id': headcode, 'a': arrival_time, 'd': departure_time, 'o': origin, 'dest': dest}})
                     self.train_service_dict[platform] = pl
                 except Exception as e:
-                    self.train_service_dict[platform] = OrderedDict({uid: {'plt': platform, 'lo': line_out, 'schedule': schedule, 'activity': activity, 'id': headcode, 'a': arrival_time, 'd': departure_time, 'o': origin, 'dest': dest}})
+                    self.train_service_dict[platform] = OrderedDict({uid: {'uid': uid, 'toc': toc, 'dt': dt, 'at': at, 'plt': platform, 'lo': line_out, 'schedule': schedule, 'activity': activity, 'id': headcode, 'a': arrival_time, 'd': departure_time, 'o': origin, 'dest': dest}})
                 else:
                     pass
 
@@ -130,13 +133,15 @@ class SVGObject:
         text_y_offset = 15
         
         train_plot = self.main_dwg.rect((x - 15, y + y_offset), (width, self.row_height - height_offset), stroke='white', fill='#1f8417', stroke_width='2', rx=8, ry=8).dasharray([2, 2])
-        title_text = '{} ({} :: {} [{}])\n\n{} (pass)'.format(entry['id'], entry['o'], entry['dest'], entry['schedule'], entry['d'])
+        title_text = '{id} ({toc}) {dt} {o} to {dest} ({at})\n\nUID:\t{uid}\nTYPE:\t{schedule}'.format(**entry)
         if entry['lo']:
-            title_text += ' --> {}'.format(entry['lo'])
+            title_text += '\nLINE OUT:\t{lo}'.format(**entry)
+
+        title_text += '\n\nPASS: {d}'.format(**entry)
         train_plot.set_desc(title=title_text)
         self.main_dwg.add(train_plot)
         self.main_dwg.add(self.main_dwg.text(entry['id'], insert=(x + text_x_offset, y + text_y_offset), fill='white', font_size='12px', font_weight='bold', font_family='Arial'))
-
+ 
     def draw_calling_train(self, arr_x, dep_x, y, width, entry):
 
         y_offset = 2
@@ -145,9 +150,10 @@ class SVGObject:
         text_y_offset = 15
 
         train_plot = self.main_dwg.rect((arr_x, y + y_offset), (width, self.row_height - height_offset), stroke='white', fill='#f45042', stroke_width='2', rx=8, ry=8)
-        title_text = '{} ({} :: {} [{}])\n\n{} (arr) {} (dep)'.format(entry['id'], entry['o'], entry['dest'], entry['schedule'], entry['a'], entry['d'])
+        title_text = '{id} ({toc}) {dt} {o} to {dest} ({at})\n\nUID:\t{uid}\nTYPE:\t{schedule}'.format(**entry)
         if entry['lo']:
-            title_text += ' --> {}'.format(entry['lo'])
+            title_text += '\nLINE OUT:\t{lo}'.format(**entry)
+        title_text += '\n\nARR: {a}, DEP: {d}'.format(**entry)
         train_plot.set_desc(title=title_text)
         self.main_dwg.add(train_plot)
         self.main_dwg.add(self.main_dwg.text(entry['id'], insert=(arr_x + text_x_offset, y + text_y_offset), fill='white', font_size='12px', font_weight='bold', font_family='Arial'))
@@ -160,7 +166,8 @@ class SVGObject:
         text_y_offset = 15
 
         train_plot = self.main_dwg.rect((x, y + y_offset), (width, self.row_height - height_offset), stroke='white', fill='white', stroke_width='2', rx=8, ry=8)
-        title_text = '{} ({} :: {} [{}])\n\n{} (arr)'.format(entry['id'], entry['o'], entry['dest'], entry['schedule'], entry['a'])
+        title_text = '{id} ({toc}) {dt} {o} to {dest} ({at})\n\nUID:\t{uid}\nTYPE:\t{schedule}'.format(**entry)
+        title_text += '\n\nARR: {a}'.format(**entry)
         train_plot.set_desc(title=title_text)
         self.main_dwg.add(train_plot)
         self.main_dwg.add(self.main_dwg.text(entry['id'], insert=(x + text_x_offset, y + text_y_offset), fill='red', font_size='12px', font_weight='bold', font_family='Arial'))
@@ -173,9 +180,10 @@ class SVGObject:
         text_y_offset = 32
 
         train_plot = self.main_dwg.rect((x - width, y + y_offset), (width, self.row_height - height_offset), stroke='white', fill='white', stroke_width='2', rx=8, ry=8)
-        title_text = '{} ({} :: {} [{}])\n\n{} (dep)'.format(entry['id'], entry['o'], entry['dest'], entry['schedule'], entry['d'])
+        title_text = '{id} ({toc}) {dt} {o} to {dest} ({at})\n\nUID:\t{uid}\nTYPE:\t{schedule}'.format(**entry)
         if entry['lo']:
-            title_text += ' --> {}'.format(entry['lo'])
+            title_text += '\nLINE OUT:\t{lo}'.format(**entry)
+        title_text += '\n\nDEP: {d}'.format(**entry)
         train_plot.set_desc(title=title_text)
         self.main_dwg.add(train_plot)
         self.main_dwg.add(self.main_dwg.text(entry['id'], insert=((x - width) + text_x_offset, y + text_y_offset), fill='green', font_size='12px', font_weight='bold', font_family='Arial'))
@@ -461,7 +469,7 @@ class SVGObject:
         self.seperator_line_height = 2  # The height of the seperators lines.
         self.tl_padding = 10  # The padding either side of the timeline
         self.scroll_left = 0
-        self.trains = []
+        #self.trains = []
         self.platform_bottom_line = {}
         self.row_height = 0
         self.train_service_dict = {}
