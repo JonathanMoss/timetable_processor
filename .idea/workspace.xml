@@ -2,12 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e299f683-fc1e-4832-ade2-3e76491fb6c3" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cif_extract.py" beforeDir="false" afterPath="$PROJECT_DIR$/cif_extract.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cif_record.db" beforeDir="false" afterPath="$PROJECT_DIR$/cif_record.db" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docker/CREWE.csv" beforeDir="false" afterPath="$PROJECT_DIR$/docker/CREWE.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docker/svg.py" beforeDir="false" afterPath="$PROJECT_DIR$/docker/svg.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docker/templates/layout.html" beforeDir="false" afterPath="$PROJECT_DIR$/docker/templates/layout.html" afterDir="false" />
     </list>
     <ignored path="cif/" />
     <ignored path="DFROC2R(A)/" />
@@ -37,8 +32,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/docker/svg.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="210">
-              <caret line="308" selection-start-line="308" selection-end-line="308" />
+            <state relative-caret-position="330">
+              <caret line="304" column="9" selection-start-line="304" selection-start-column="9" selection-end-line="304" selection-end-column="9" />
               <folding>
                 <element signature="e#19#34#0" expanded="true" />
               </folding>
@@ -372,12 +367,18 @@
       <option name="project" value="LOCAL" />
       <updated>1554560014644</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="Added configuration for Platform information - length, PP etc..">
+      <created>1554668061600</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1554668061600</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="ToolWindowManager">
     <frame x="-1" y="25" width="1602" height="876" extended-state="6" />
-    <editor active="true" />
     <layout>
       <window_info id="Favorites" order="0" sideWeight="0.5011521" side_tool="true" weight="0.18263632" />
       <window_info content_ui="combo" id="Project" order="1" sideWeight="0.49884793" visible="true" weight="0.25681674" />
@@ -540,8 +541,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/docker/svg.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="210">
-          <caret line="308" selection-start-line="308" selection-end-line="308" />
+        <state relative-caret-position="330">
+          <caret line="304" column="9" selection-start-line="304" selection-start-column="9" selection-end-line="304" selection-end-column="9" />
           <folding>
             <element signature="e#19#34#0" expanded="true" />
           </folding>

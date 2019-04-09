@@ -65,8 +65,12 @@ class SVGObject:
                 platform = details[7].strip()
                 arrival_time = details[9].strip()
                 departure_time = details[10].strip()
+                origin = details[4].strip()
+                dest = details[5].strip()
+                schedule = details[1].strip()
+                line_out = details[8].strip()
 
-                self.trains.append({'activity': activity, 'id': headcode, 'plt': platform, 'a': arrival_time, 'd': departure_time})
+                self.trains.append({'lo': line_out, 'schedule': schedule, 'activity': activity, 'id': headcode, 'plt': platform, 'a': arrival_time, 'd': departure_time, 'o': origin, 'dest': dest})
 
     def return_x_coordinate(self, time):
 
@@ -91,45 +95,63 @@ class SVGObject:
 
         return None  
         
-    def draw_passing_train(self, x, y, width, identity):
+    def draw_passing_train(self, x, y, width, entry):
 
         y_offset = 2
         height_offset = 4
         text_x_offset = 5
         text_y_offset = 15
         
-        self.main_dwg.add(self.main_dwg.rect((x, y + y_offset), (width, self.row_height - height_offset), stroke='white', fill='#1f8417', stroke_width='2', rx=8, ry=8).dasharray([2, 2]))
-        self.main_dwg.add(self.main_dwg.text(identity, insert=(x + text_x_offset, y + text_y_offset), fill='white', font_size='12px', font_weight='bold', font_family='Arial'))
+        train_plot = self.main_dwg.rect((x, y + y_offset), (width, self.row_height - height_offset), stroke='white', fill='#1f8417', stroke_width='2', rx=8, ry=8).dasharray([2, 2])
+        title_text = '{} ({} :: {} [{}])\n\n{} (pass)'.format(entry['id'], entry['o'], entry['dest'], entry['schedule'], entry['d'])
+        if entry['lo']:
+        	title_text += ' --> {}'.format(entry['lo'])
+        train_plot.set_desc(title=title_text)
+        self.main_dwg.add(train_plot)
+        self.main_dwg.add(self.main_dwg.text(entry['id'], insert=(x + text_x_offset, y + text_y_offset), fill='white', font_size='12px', font_weight='bold', font_family='Arial'))
 
-    def draw_calling_train(self, arr_x, dep_x, y, width, identity):
-
-        y_offset = 2
-        height_offset = 4
-        text_x_offset = 5
-        text_y_offset = 15
-
-        self.main_dwg.add(self.main_dwg.rect((arr_x, y + y_offset), (width, self.row_height - height_offset), stroke='white', fill='#f45042', stroke_width='2', rx=8, ry=8))
-        self.main_dwg.add(self.main_dwg.text(identity, insert=(arr_x + text_x_offset, y + text_y_offset), fill='white', font_size='12px', font_weight='bold', font_family='Arial'))
-
-    def draw_terminating_train(self, x, y, width, identity):
+    def draw_calling_train(self, arr_x, dep_x, y, width, entry):
 
         y_offset = 2
         height_offset = 4
         text_x_offset = 5
         text_y_offset = 15
 
-        self.main_dwg.add(self.main_dwg.rect((x, y + y_offset), (width, self.row_height - height_offset), stroke='white', fill='yellow', stroke_width='2', rx=8, ry=8))
-        self.main_dwg.add(self.main_dwg.text(identity, insert=(x + text_x_offset, y + text_y_offset), fill='black', font_size='12px', font_weight='bold', font_family='Arial'))
+        train_plot = self.main_dwg.rect((arr_x, y + y_offset), (width, self.row_height - height_offset), stroke='white', fill='#f45042', stroke_width='2', rx=8, ry=8)
+        title_text = '{} ({} :: {} [{}])\n\n{} (arr) {} (dep)'.format(entry['id'], entry['o'], entry['dest'], entry['schedule'], entry['a'], entry['d'])
+        if entry['lo']:
+        	title_text += ' --> {}'.format(entry['lo'])
+        train_plot.set_desc(title=title_text)
+        self.main_dwg.add(train_plot)
+        self.main_dwg.add(self.main_dwg.text(entry['id'], insert=(arr_x + text_x_offset, y + text_y_offset), fill='white', font_size='12px', font_weight='bold', font_family='Arial'))
 
-    def draw_starting_train(self, x, y, width, identity):
+    def draw_terminating_train(self, x, y, width, entry):
+
+        y_offset = 2
+        height_offset = 4
+        text_x_offset = 5
+        text_y_offset = 15
+
+        train_plot = self.main_dwg.rect((x, y + y_offset), (width, self.row_height - height_offset), stroke='white', fill='yellow', stroke_width='2', rx=8, ry=8)
+        title_text = '{} ({} :: {} [{}])\n\n{} (arr)'.format(entry['id'], entry['o'], entry['dest'], entry['schedule'], entry['a'])
+        train_plot.set_desc(title=title_text)
+        self.main_dwg.add(train_plot)
+        self.main_dwg.add(self.main_dwg.text(entry['id'], insert=(x + text_x_offset, y + text_y_offset), fill='black', font_size='12px', font_weight='bold', font_family='Arial'))
+
+    def draw_starting_train(self, x, y, width, entry):
 
         y_offset = 2
         height_offset = 4
         text_x_offset = 5
         text_y_offset = 32
 
-        self.main_dwg.add(self.main_dwg.rect((x, y + y_offset), (width, self.row_height - height_offset), stroke='white', fill='grey', stroke_width='2', rx=8, ry=8))
-        self.main_dwg.add(self.main_dwg.text(identity, insert=(x + text_x_offset, y + text_y_offset), fill='pink', font_size='12px', font_weight='bold', font_family='Arial'))
+        train_plot = self.main_dwg.rect((x - width, y + y_offset), (width, self.row_height - height_offset), stroke='white', fill='grey', stroke_width='2', rx=8, ry=8)
+        title_text = '{} ({} :: {} [{}])\n\n{} (dep)'.format(entry['id'], entry['o'], entry['dest'], entry['schedule'], entry['d'])
+        if entry['lo']:
+        	title_text += ' --> {}'.format(entry['lo'])
+        train_plot.set_desc(title=title_text)
+        self.main_dwg.add(train_plot)
+        self.main_dwg.add(self.main_dwg.text(entry['id'], insert=((x - width) + text_x_offset, y + text_y_offset), fill='pink', font_size='12px', font_weight='bold', font_family='Arial'))
 
     def render_trains(self):
 
@@ -144,29 +166,27 @@ class SVGObject:
                     x = self.return_x_coordinate(entry['a'])
                     y = self.return_y_coordinate(entry['plt'])
                     id = entry['id'] 
-                    self.draw_terminating_train(x, y, width, id)
+                    self.draw_terminating_train(x, y, width, entry)
                 if entry['activity'].strip() == 'TB':
                     # Train starts at the location
                     x = self.return_x_coordinate(entry['d'])
                     y = self.return_y_coordinate(entry['plt'])
                     id = entry['id'] 
-                    self.draw_starting_train(x, y, width, id)
+                    self.draw_starting_train(x, y, width, entry)
 
-            else:
+            else:  # Train calls
                 if entry['a'].strip():
                     arr_x = self.return_x_coordinate(entry['a'])
                     dep_x = self.return_x_coordinate(entry['d'])
                     y = self.return_y_coordinate(entry['plt'])
-                    id = entry['id']
                     width = dep_x - arr_x
-                    self.draw_calling_train(arr_x, dep_x, y, width, id)
+                    self.draw_calling_train(arr_x, dep_x, y, width, entry)
 
                 else:
                     # Train passes through
                     x = self.return_x_coordinate(entry['d'])
                     y = self.return_y_coordinate(entry['plt'])
-                    id = entry['id']
-                    self.draw_passing_train(x, y, width, id)
+                    self.draw_passing_train(x, y, width, entry)
 
     @staticmethod
     def parse_platforms(json_string):
