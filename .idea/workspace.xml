@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e299f683-fc1e-4832-ade2-3e76491fb6c3" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/cif_record.db" beforeDir="false" afterPath="$PROJECT_DIR$/cif_record.db" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docker/svg.py" beforeDir="false" afterPath="$PROJECT_DIR$/docker/svg.py" afterDir="false" />
     </list>
     <ignored path="cif/" />
     <ignored path="DFROC2R(A)/" />
@@ -18,10 +18,22 @@
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/docker/docker.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="225">
+              <caret line="16" column="23" selection-start-line="16" selection-start-column="23" selection-end-line="16" selection-end-column="23" />
+              <folding>
+                <element signature="e#0#48#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/cif_extract.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="10800">
-              <caret line="727" column="84" selection-start-line="727" selection-start-column="84" selection-end-line="727" selection-end-column="84" />
+            <state relative-caret-position="10785">
+              <caret line="726" column="81" selection-start-line="726" selection-start-column="81" selection-end-line="726" selection-end-column="81" />
               <folding>
                 <element signature="e#19#36#0" expanded="true" />
               </folding>
@@ -32,11 +44,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/docker/svg.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="330">
-              <caret line="304" column="9" selection-start-line="304" selection-start-column="9" selection-end-line="304" selection-end-column="9" />
-              <folding>
-                <element signature="e#19#34#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="-1050">
+              <caret line="33" column="53" lean-forward="true" selection-start-line="33" selection-start-column="53" selection-end-line="33" selection-end-column="53" />
             </state>
           </provider>
         </entry>
@@ -132,6 +141,12 @@
               <item name="timetable_processor" type="b2602c69:ProjectViewProjectNode" />
               <item name="timetable_processor" type="462c0819:PsiDirectoryNode" />
               <item name="docker" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="timetable_processor" type="b2602c69:ProjectViewProjectNode" />
+              <item name="timetable_processor" type="462c0819:PsiDirectoryNode" />
+              <item name="docker" type="462c0819:PsiDirectoryNode" />
+              <item name="static" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="timetable_processor" type="b2602c69:ProjectViewProjectNode" />
@@ -378,10 +393,10 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-1" y="25" width="1602" height="876" extended-state="6" />
+    <frame x="0" y="277" width="1920" height="1080" extended-state="6" />
     <layout>
       <window_info id="Favorites" order="0" sideWeight="0.5011521" side_tool="true" weight="0.18263632" />
-      <window_info content_ui="combo" id="Project" order="1" sideWeight="0.49884793" visible="true" weight="0.25681674" />
+      <window_info content_ui="combo" id="Project" order="1" sideWeight="0.49884793" visible="true" weight="0.21929362" />
       <window_info id="Structure" order="2" side_tool="true" weight="0.25" />
       <window_info id="DB Browser" order="3" />
       <window_info id="Project Explorer" order="4" />
@@ -391,7 +406,7 @@
       <window_info anchor="bottom" id="Python Console" order="2" />
       <window_info anchor="bottom" id="Message" order="3" />
       <window_info anchor="bottom" id="Find" order="4" weight="0.32980132" />
-      <window_info active="true" anchor="bottom" id="Version Control" order="5" visible="true" weight="0.32980132" />
+      <window_info active="true" anchor="bottom" id="Version Control" order="5" visible="true" weight="0.3294979" />
       <window_info anchor="bottom" id="Run" order="6" visible="true" weight="0.25430465" />
       <window_info anchor="bottom" id="Debug" order="7" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="8" weight="0.25" />
@@ -521,7 +536,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/docker/docker.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="240">
+        <state relative-caret-position="225">
           <caret line="16" column="23" selection-start-line="16" selection-start-column="23" selection-end-line="16" selection-end-column="23" />
           <folding>
             <element signature="e#0#48#0" expanded="true" />
@@ -531,8 +546,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/cif_extract.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="10800">
-          <caret line="727" column="84" selection-start-line="727" selection-start-column="84" selection-end-line="727" selection-end-column="84" />
+        <state relative-caret-position="10785">
+          <caret line="726" column="81" selection-start-line="726" selection-start-column="81" selection-end-line="726" selection-end-column="81" />
           <folding>
             <element signature="e#19#36#0" expanded="true" />
           </folding>
@@ -541,11 +556,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/docker/svg.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="330">
-          <caret line="304" column="9" selection-start-line="304" selection-start-column="9" selection-end-line="304" selection-end-column="9" />
-          <folding>
-            <element signature="e#19#34#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="-1050">
+          <caret line="33" column="53" lean-forward="true" selection-start-line="33" selection-start-column="53" selection-end-line="33" selection-end-column="53" />
         </state>
       </provider>
     </entry>

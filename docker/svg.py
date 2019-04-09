@@ -4,7 +4,10 @@ import json
 import re
 from datetime import datetime, timedelta
 from datetimerange import DateTimeRange
+from collections import OrderedDict
+import pprint
 
+pp = pprint.PrettyPrinter(indent=4)
 
 class SVGObject:
 
@@ -31,7 +34,7 @@ class SVGObject:
                      '20': ['Bi/Di Goods Loop', ],
                      '21': ['Bi/Di Goods Loop (Up)', ],
                      '22': ['Bi/Di Goods Loop (Down)', ],
-                     '24': ['Through Yard/Siding', ],
+                     '23': ['Through Yard/Siding', ],
                      '24': ['Yard/Siding', ]}
 
     JSON = '{"location" : "Crewe Station",' \
@@ -52,11 +55,12 @@ class SVGObject:
            '["UDL", "Up & Dn Loop", 17, 361, "PF"],' \
            '[12, "Platform 12", 10, 424, 432, "PF-A"]], ' \
            '"start_time": "00:00", ' \
-           '"end_time": "23:00"}'
+           '"end_time": "23:59"}'
 
     # JSON = '{"platforms": [1, 2, 3, 4, 5]}'
 
     def parse_csv(self):
+
         with open('CREWE.csv') as fl:
             for line in fl:
                 details = line.split(',')
@@ -69,8 +73,31 @@ class SVGObject:
                 dest = details[5].strip()
                 schedule = details[1].strip()
                 line_out = details[8].strip()
+                uid = details[3].strip()
 
                 self.trains.append({'lo': line_out, 'schedule': schedule, 'activity': activity, 'id': headcode, 'plt': platform, 'a': arrival_time, 'd': departure_time, 'o': origin, 'dest': dest})
+
+                try:
+                    pl = self.train_service_dict[platform]
+                    pl.update({uid: {'plt': platform, 'lo': line_out, 'schedule': schedule, 'activity': activity, 'id': headcode, 'a': arrival_time, 'd': departure_time, 'o': origin, 'dest': dest}})
+                    self.train_service_dict[platform] = pl
+                except Exception as e:
+                    self.train_service_dict[platform] = OrderedDict({uid: {'plt': platform, 'lo': line_out, 'schedule': schedule, 'activity': activity, 'id': headcode, 'a': arrival_time, 'd': departure_time, 'o': origin, 'dest': dest}})
+                else:
+                    pass
+
+        prev_working_time = ''
+        for k, v in self.train_service_dict.items():
+            #print(f'\nPlatform/Line: {k}')
+            for item in v:
+                if v[item]['activity'] == 'TF':
+                    prev_working_time = v[item]['a']
+                if v[item]['activity'] == 'TB' and prev_working_time:
+                    self.train_service_dict[k][item].update({'inbound_time': prev_working_time})
+                    prev_working_time = ""
+                    
+        pp.pprint(self.train_service_dict)
+
 
     def return_x_coordinate(self, time):
 
@@ -99,13 +126,13 @@ class SVGObject:
 
         y_offset = 2
         height_offset = 4
-        text_x_offset = 5
+        text_x_offset = -10
         text_y_offset = 15
         
-        train_plot = self.main_dwg.rect((x, y + y_offset), (width, self.row_height - height_offset), stroke='white', fill='#1f8417', stroke_width='2', rx=8, ry=8).dasharray([2, 2])
+        train_plot = self.main_dwg.rect((x - 15, y + y_offset), (width, self.row_height - height_offset), stroke='white', fill='#1f8417', stroke_width='2', rx=8, ry=8).dasharray([2, 2])
         title_text = '{} ({} :: {} [{}])\n\n{} (pass)'.format(entry['id'], entry['o'], entry['dest'], entry['schedule'], entry['d'])
         if entry['lo']:
-        	title_text += ' --> {}'.format(entry['lo'])
+            title_text += ' --> {}'.format(entry['lo'])
         train_plot.set_desc(title=title_text)
         self.main_dwg.add(train_plot)
         self.main_dwg.add(self.main_dwg.text(entry['id'], insert=(x + text_x_offset, y + text_y_offset), fill='white', font_size='12px', font_weight='bold', font_family='Arial'))
@@ -120,7 +147,7 @@ class SVGObject:
         train_plot = self.main_dwg.rect((arr_x, y + y_offset), (width, self.row_height - height_offset), stroke='white', fill='#f45042', stroke_width='2', rx=8, ry=8)
         title_text = '{} ({} :: {} [{}])\n\n{} (arr) {} (dep)'.format(entry['id'], entry['o'], entry['dest'], entry['schedule'], entry['a'], entry['d'])
         if entry['lo']:
-        	title_text += ' --> {}'.format(entry['lo'])
+            title_text += ' --> {}'.format(entry['lo'])
         train_plot.set_desc(title=title_text)
         self.main_dwg.add(train_plot)
         self.main_dwg.add(self.main_dwg.text(entry['id'], insert=(arr_x + text_x_offset, y + text_y_offset), fill='white', font_size='12px', font_weight='bold', font_family='Arial'))
@@ -132,11 +159,11 @@ class SVGObject:
         text_x_offset = 5
         text_y_offset = 15
 
-        train_plot = self.main_dwg.rect((x, y + y_offset), (width, self.row_height - height_offset), stroke='white', fill='yellow', stroke_width='2', rx=8, ry=8)
+        train_plot = self.main_dwg.rect((x, y + y_offset), (width, self.row_height - height_offset), stroke='white', fill='white', stroke_width='2', rx=8, ry=8)
         title_text = '{} ({} :: {} [{}])\n\n{} (arr)'.format(entry['id'], entry['o'], entry['dest'], entry['schedule'], entry['a'])
         train_plot.set_desc(title=title_text)
         self.main_dwg.add(train_plot)
-        self.main_dwg.add(self.main_dwg.text(entry['id'], insert=(x + text_x_offset, y + text_y_offset), fill='black', font_size='12px', font_weight='bold', font_family='Arial'))
+        self.main_dwg.add(self.main_dwg.text(entry['id'], insert=(x + text_x_offset, y + text_y_offset), fill='red', font_size='12px', font_weight='bold', font_family='Arial'))
 
     def draw_starting_train(self, x, y, width, entry):
 
@@ -145,48 +172,70 @@ class SVGObject:
         text_x_offset = 5
         text_y_offset = 32
 
-        train_plot = self.main_dwg.rect((x - width, y + y_offset), (width, self.row_height - height_offset), stroke='white', fill='grey', stroke_width='2', rx=8, ry=8)
+        train_plot = self.main_dwg.rect((x - width, y + y_offset), (width, self.row_height - height_offset), stroke='white', fill='white', stroke_width='2', rx=8, ry=8)
         title_text = '{} ({} :: {} [{}])\n\n{} (dep)'.format(entry['id'], entry['o'], entry['dest'], entry['schedule'], entry['d'])
         if entry['lo']:
-        	title_text += ' --> {}'.format(entry['lo'])
+            title_text += ' --> {}'.format(entry['lo'])
         train_plot.set_desc(title=title_text)
         self.main_dwg.add(train_plot)
-        self.main_dwg.add(self.main_dwg.text(entry['id'], insert=((x - width) + text_x_offset, y + text_y_offset), fill='pink', font_size='12px', font_weight='bold', font_family='Arial'))
+        self.main_dwg.add(self.main_dwg.text(entry['id'], insert=((x - width) + text_x_offset, y + text_y_offset), fill='green', font_size='12px', font_weight='bold', font_family='Arial'))
+
+
+    def draw_assoc(self, x1, x2, y):
+
+        y_offset = 2
+        height_offset = 4
+        train_plot = self.main_dwg.rect((x1, y + y_offset), (x2 - x1, self.row_height - height_offset), id='ASSOC', stroke='white', opacity='1', fill='white', stroke_width='2', rx=8, ry=8)
+        self.main_dwg.add(train_plot)
 
     def render_trains(self):
 
-        for entry in self.trains:
+        for k,v in self.train_service_dict.items():
+            for entry in v:
+                if re.search('TF|TB', v[entry]['activity']) is not None:
+                    if v[entry]['activity'].strip() == 'TB':
+                        x = self.return_x_coordinate(v[entry]['d'])
+                        y = self.return_y_coordinate(v[entry]['plt'])
+                        try:
+                            inbound_time = self.return_x_coordinate(v[entry]['inbound_time'])
+                            self.draw_assoc(inbound_time, x, y)
+                        except Exception as e:
+                            pass
+                        
+        for k, v in self.train_service_dict.items():
+            for entry in v:
+                
+                width = 40
+                if re.search('TF|TB', v[entry]['activity']) is not None:
+                    # Train either starts or terminates at the TIPLOC.
+                    if v[entry]['activity'].strip() == 'TF':
+                        # Train terminates at the location
+                        x = self.return_x_coordinate(v[entry]['a'])
+                        y = self.return_y_coordinate(v[entry]['plt'])
+                        id = v[entry]['id'] 
+                        self.draw_terminating_train(x, y, width, v[entry])
+                    if v[entry]['activity'].strip() == 'TB':
+                        # Train starts at the location
+                        x = self.return_x_coordinate(v[entry]['d'])
+                        y = self.return_y_coordinate(v[entry]['plt'])
+                        id = v[entry]['id'] 
+                    
+                        self.draw_starting_train(x, y, width, v[entry])
 
-            width = 40
+                else:  # Train calls
+                    if v[entry]['a'].strip():
+                        arr_x = self.return_x_coordinate(v[entry]['a'])
+                        dep_x = self.return_x_coordinate(v[entry]['d'])
+                        y = self.return_y_coordinate(v[entry]['plt'])
+                        width = dep_x - arr_x
+                        self.draw_calling_train(arr_x, dep_x, y, width, v[entry])
 
-            if re.search('TF|TB', entry['activity']) is not None:
-                # Train either starts or terminates at the TIPLOC.
-                if entry['activity'].strip() == 'TF':
-                    # Train terminates at the location
-                    x = self.return_x_coordinate(entry['a'])
-                    y = self.return_y_coordinate(entry['plt'])
-                    id = entry['id'] 
-                    self.draw_terminating_train(x, y, width, entry)
-                if entry['activity'].strip() == 'TB':
-                    # Train starts at the location
-                    x = self.return_x_coordinate(entry['d'])
-                    y = self.return_y_coordinate(entry['plt'])
-                    id = entry['id'] 
-                    self.draw_starting_train(x, y, width, entry)
+                    else:
+                        # Train passes through
+                        x = self.return_x_coordinate(v[entry]['d'])
+                        y = self.return_y_coordinate(v[entry]['plt'])
+                        self.draw_passing_train(x, y, width, v[entry])   
 
-            else:  # Train calls
-                if entry['a'].strip():
-                    arr_x = self.return_x_coordinate(entry['a'])
-                    dep_x = self.return_x_coordinate(entry['d'])
-                    y = self.return_y_coordinate(entry['plt'])
-                    width = dep_x - arr_x
-                    self.draw_calling_train(arr_x, dep_x, y, width, entry)
-
-                else:
-                    # Train passes through
-                    x = self.return_x_coordinate(entry['d'])
-                    y = self.return_y_coordinate(entry['plt'])
-                    self.draw_passing_train(x, y, width, entry)
 
     @staticmethod
     def parse_platforms(json_string):
@@ -253,20 +302,26 @@ class SVGObject:
 
         # Iterate through the time range and draw time elements along timeline
         for val in time_range.range(timedelta(minutes=1)):
-            
+
+            tm_hour = f'0{val.hour}'[-2:]
+            tm_min = f'0{val.minute}'[-2:]
+
             if str(val.minute) == '0':
-                if len(str(val.hour)) == 1:
-                    hr = '0{}'.format(str(val.hour))
-                else:
-                    hr = str(val.hour)
                 self.main_dwg.add(self.main_dwg.line(start=(x, (y - 15)), end=(x, (y + 15)), stroke_width=2, stroke='red'))
-                self.main_dwg.add(self.main_dwg.text(hr, insert=(x - 5, y + 26), fill='black', font_size='10px', font_weight='bold', font_family='Arial'))
+                self.main_dwg.add(self.main_dwg.text(tm_hour + ':00', insert=(x - 15, y + 26), fill='black', font_size='12px', font_weight='bold', font_family='Arial'))
+                self.main_dwg.add(self.main_dwg.line(start=(x, 0), end=(x, self.svg_height - self.bottom_border), stroke_width=1, stroke='grey', opacity='0.40'))
             if str(val.minute) == '15' or str(val.minute) == '45':
                 self.main_dwg.add(self.main_dwg.line(start=(x, (y - 10)), end=(x, (y + 10)), stroke_width=2, stroke='black'))
+                self.main_dwg.add(self.main_dwg.text(tm_min, insert=(x - 7, y + 20), fill='black', font_size='12px', font_weight='bold', font_family='Arial'))
+                self.main_dwg.add(self.main_dwg.line(start=(x, 0), end=(x, self.svg_height - self.bottom_border), stroke_width=1, stroke='grey', opacity='0.40'))
             if str(val.minute) == '30':
                 self.main_dwg.add(self.main_dwg.circle(center=(x, y), r=4, fill='red'))
+                self.main_dwg.add(self.main_dwg.text(str(tm_min), insert=(x - 7, y + 15), fill='black', font_size='12px', font_weight='bold', font_family='Arial'))
+                self.main_dwg.add(self.main_dwg.line(start=(x, 0), end=(x, self.svg_height - self.bottom_border), stroke_width=1, stroke='grey', opacity='0.40'))
             if str(val.minute) in ('5', '10', '20', '25', '35', '40', '50', '55'):
                 self.main_dwg.add(self.main_dwg.line(start=(x, y - 3), end=(x, y + 3), stroke_width=1, stroke='black'))
+                self.main_dwg.add(self.main_dwg.text(tm_min, insert=(x - 5, y + 15), fill='black', font_size='10px', font_weight='bold', font_family='Arial'))
+                self.main_dwg.add(self.main_dwg.line(start=(x, 0), end=(x, self.svg_height - self.bottom_border), stroke_width=1, stroke='grey', opacity='0.40'))
             x += self.ticks
             
     def draw_time_now(self):
@@ -368,7 +423,7 @@ class SVGObject:
             function scroll_tl(){{
                 var time_line = document.getElementById("time_now");
                 var start_time = new Date('{}');
-            	var current_time = new Date();
+                var current_time = new Date();
                 start_time.setFullYear(current_time.getFullYear());
                 start_time.setMonth(current_time.getMonth());
                 start_time.setDate(current_time.getDate());
@@ -409,6 +464,7 @@ class SVGObject:
         self.trains = []
         self.platform_bottom_line = {}
         self.row_height = 0
+        self.train_service_dict = {}
         
         # Instantiate the 2 svg drawings - one for the index, the other for the docker background (main)
         self.index_dwg = svgwrite.Drawing(id='index_dwg',size=(self.index_svg_width, self.svg_height), profile='tiny')
