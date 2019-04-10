@@ -33,10 +33,9 @@
 	 	function loadJSON(callback) {   
     		var xobj = new XMLHttpRequest();
         	xobj.overrideMimeType("application/json");
-    		xobj.open('GET', 'static/train_service.json', true); // Replace 'my_data' with the path to your file
+    		xobj.open('GET', 'static/train_service.json', true); 
     		xobj.onreadystatechange = function () {
           		if (xobj.readyState == 4 && xobj.status == "200") {
-            		// Required use of an anonymous callback as .open will NOT return a value but simply returns undefined in asynchronous mode
             		callback(xobj.responseText);
           		}
     		};
@@ -54,106 +53,79 @@
  				tr.appendChild(th);
  			}
  			for (var i = 0; i < schedule['schedule_line'].length; i++) {
- 				
  				var tr = table.insertRow(-1);
  				for (var j = 0; j < schedule['schedule_line'][i].length; j++) {
  					var tabCell = tr.insertCell(-1);
  					tabCell.innerHTML = schedule['schedule_line'][i][j];
  				}
-
 			}
 
 			container = document.getElementById("modal_body");
 			container.innerHTML = "";
 			container.appendChild(table);
-
-			
-
  		}
 
 		function train_click(evt) {
-			if (evt.shiftKey) {
-				var tgt = evt.target.id;
-				console.log(tgt.substring(0, 6));
-				var schedules = train_service_json.schedules;
-				for (var i = 0; i < schedules.length; i++) {
-					if (schedules[i]['uid'] == tgt.substring(0, 6)) {
-						train_service_modal.style.display="block";
-						document.getElementById("modal_header").textContent=schedules[i]['train_description'];
-						create_table(schedules[i]);
-						document.getElementById("modal_footer").innerHTML = "UID: " + schedules[i]['uid'] + ", Schedule Type: "	+ schedules[i]['type']				
-					}
-					
-				}
-				
-				
-			}
 			
+			var tgt = evt.target.id;
+			console.log(tgt.substring(0, 6));
+			var schedules = train_service_json.schedules;
+			for (var i = 0; i < schedules.length; i++) {
+				if (schedules[i]['uid'] == tgt.substring(0, 6)) {
+					train_service_modal.style.display="block";
+					document.getElementById("modal_header").textContent=schedules[i]['train_description'];
+					create_table(schedules[i]);
+					document.getElementById("modal_footer").innerHTML = "UID: " + schedules[i]['uid'] + ", Schedule Type: "	+ schedules[i]['type']				
+				}				
+			}
 		}
 	</script>
-
-
 	<style>
 
-	
-		.platform_text{
-
+		.platform_text {
 			stroke: none;
 			fill: white;
 			font-size: 15px;
 			font-weight: bold;
 			font-family: 'Arial';
-			
 		}
 
-		.content{
-
+		.content {
 			background-color: #e8ecf2;
 			max-width: 100%;
-
 		}
 
-		.svg_index{
-
+		.svg_index {
 			max-width: 160px;
 			width: 160px;
 			position: absolute;
-
 		}
 
-		.svg_main{
-
+		.svg_main {
 			overflow-x: auto;
 			margin-left: 160px;
-
 		}
 
-		body{
-
+		body {
 			background-color: #e8ecf2;
-
 		}
 
 		.switch {
-
-		  	position: relative;
-		  	display: inline-block;
-		  	width: 60px;
-		  	height: 34px;
-		  	top: -76px;
+			position: relative;
+			display: inline-block;
+			width: 60px;
+			height: 34px;
+			top: -76px;
 		}
 
 		.switch input { 
-
 			opacity: 0;
 			width: 0;
 			height: 0;
 			position: absolute;
-
 		}
 
-		.slider {
-
+			.slider {
 			position: absolute;
 			cursor: pointer;
 			top: 0;
@@ -163,11 +135,9 @@
 			background-color: #ccc;
 			-webkit-transition: .4s;
 			transition: .4s;
-
 		}
 
 		.slider:before {
-
 			position: absolute;
 			content: "";
 			height: 26px;
@@ -177,43 +147,32 @@
 			background-color: white;
 			-webkit-transition: .4s;
 			transition: .4s;
-
 		}
 
 		input:checked + .slider {
-
-	  		background-color: #2196F3;
-
+			background-color: #2196F3;
 		}
 
 		input:focus + .slider {
-
-	  		box-shadow: 0 0 1px #2196F3;
-
+			box-shadow: 0 0 1px #2196F3;
 		}
 
 		input:checked + .slider:before {
-
-	  		-webkit-transform: translateX(26px);
-	  		-ms-transform: translateX(26px);
-	  		transform: translateX(26px);
+			-webkit-transform: translateX(26px);
+			-ms-transform: translateX(26px);
+			transform: translateX(26px);
 		}
 
 		/* Rounded sliders */
 		.slider.round {
-
-		  	border-radius: 34px;
-
+			border-radius: 34px;
 		}
 
 		.slider.round:before {
-		  
 			border-radius: 50%;
-
 		}
 
 		#clock_img {
-
 			width:25px;
 			position: absolute;
 			left: 80px;
@@ -222,112 +181,111 @@
 
 		/* The Modal (background) */
 		.modal {
-		  display: none; /* Hidden by default */
-		  position: fixed; /* Stay in place */
-		  z-index: 1; /* Sit on top */
-		  left: 0;
-		  top: 0;
-		  width: 100%; /* Full width */
-		  height: 100%; /* Full height */
-		  overflow: auto; /* Enable scroll if needed */
-		  background-color: rgb(0,0,0); /* Fallback color */
-		  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+			display: none; /* Hidden by default */
+			position: fixed; /* Stay in place */
+			z-index: 1; /* Sit on top */
+			left: 0;
+			top: 0;
+			width: 100%; /* Full width */
+			height: 100%; /* Full height */
+			overflow: auto; /* Enable scroll if needed */
+			background-color: rgb(0,0,0); /* Fallback color */
+			background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
 		}
 
 		/* Modal Content/Box */
 		.modal-content {
-		  background-color: #e8ecf2;
-		  margin: 15% auto; /* 15% from the top and centered */
-		  padding: 20px;
-		  border: 1px solid #888;
-		  width: 80%; /* Could be more or less, depending on screen size */
+			background-color: #e8ecf2;
+			margin: 15% auto; /* 15% from the top and centered */
+			padding: 20px;
+			border: 1px solid #888;
+			width: 80%; /* Could be more or less, depending on screen size */
 		}
 
 		/* The Close Button */
 		.close {
-		  color: #aaa;
-		  float: right;
-		  font-size: 28px;
-		  font-weight: bold;
+			color: #aaa;
+			float: right;
+			font-size: 28px;
+			font-weight: bold;
 		}
 
 		.close:hover,
 		.close:focus {
-		  color: black;
-		  text-decoration: none;
-		  cursor: pointer;
+			color: black;
+			text-decoration: none;
+			cursor: pointer;
 		}
 
 		/* Modal Header */
-.modal-header {
-  padding: 2px 16px;
-  background-color: #e8ecf2;
-  color: black;
-}
+		.modal-header {
+			padding: 2px 16px;
+			background-color: #e8ecf2;
+			color: black;
+		}
 
-h2 {
-	font-family: 'Arial';
-	font-weight: bold;
-	font-size: 16px;
-}
+		h2 {
+			font-family: 'Arial';
+			font-weight: bold;
+			font-size: 16px;
+		}
 
-/* Modal Body */
-.modal-body {padding: 2px 16px;
-	max-height: 500px;
-	overflow-y: auto;
-}
+		/* Modal Body */
+		.modal-body {
+			padding: 2px 16px;
+			max-height: 500px;
+			overflow-y: auto;
+		}
 
-/* Modal Footer */
-.modal-footer {
-  padding: 2px 16px;
-  background-color: #e8ecf2;
-  color: black;
-  min-height: 30px;
-}
+		/* Modal Footer */
+		.modal-footer {
+			padding: 2px 16px;
+			background-color: #e8ecf2;
+			color: black;
+			min-height: 30px;
+		}
 
-/* Modal Content */
-.modal-content {
-  position: relative;
-  background-color: #fefefe;
-  margin: auto;
-  padding: 0;
-  border: 1px solid #888;
-  width: 70%;
-  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
-  animation-name: animatetop;
-  animation-duration: 0.4s
-  height: 300px;
-  min-width: 500px;
-  overflow-y: auto;
-}
+		/* Modal Content */
+		.modal-content {
+			position: relative;
+			background-color: #fefefe;
+			margin: auto;
+			padding: 0;
+			border: 1px solid #888;
+			width: 70%;
+			box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+			animation-name: animatetop;
+			animation-duration: 0.4s
+			height: 300px;
+			min-width: 500px;
+			overflow-y: auto;
+		}
 
-table {
-  border-collapse: collapse;
-  font-family: 'Arial';
-  font-size: 15px;
-}
+		table {
+			border-collapse: collapse;
+			font-family: 'Arial';
+			font-size: 15px;
+		}
 
+		th {
+			height: 50px;
+			text-align: left;
+			vertical-align: :middle;
+		}
+		th, td{
+			padding: 10px;
+			border-bottom: 1px solid #ddd;
+		}
 
+		td{
+			font-size: 12px;
+		}
 
-th {
-	height: 50px;
-	text-align: left;
-	vertical-align: :middle;
-}
-th, td{
-	padding: 10px;
-	border-bottom: 1px solid #ddd;
-}
-
-td{
-	font-size: 12px;
-}
-
-/* Add Animation */
-@keyframes animatetop {
-  from {top: -300px; opacity: 0}
-  to {top: 0; opacity: 1}
-}
+		/* Add Animation */
+		@keyframes animatetop {
+		from {top: -300px; opacity: 0}
+		to {top: 0; opacity: 1}
+		}
 
 	</style>
 	

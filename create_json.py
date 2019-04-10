@@ -1,29 +1,39 @@
 #!/usr/bin/python3
 import json
 import sqlite3
+import argparse
+import re
+from datetime import datetime
+
+parser = argparse.ArgumentParser(description='Extract the timetable into json format for use by the Platform Docker.')
+parser.add_argument('-t', '--tiploc', help='Provide a single TIPLOC to prepare.', required=True)
+parser.add_argument('-o', '--output', help='The output filename.', required=True)
+parser.add_argument('-d', '--database', help='The database filename.', required=True)
+
+args = parser.parse_args()
 
 class CreateJson:
 
-	def __init__(self, file_name='train_service.json', db=None):
+	def __init__(self, args):
 
-		self.file_name = file_name
-		self.db_conn = sqlite3.connect(db)
+		self.tiploc = args.tiploc
+		self.output_file = args.output
+		self.db_filename = args.database
+		self.db_conn = sqlite3.connect(self.db_filename)
 		self.schedule_id = []
 
 		self.get_schedule_id()
 		self.process_schedules()
 
-
 	def get_schedule_id(self):
 
 		sql_string = """
-
 			SELECT
 				tbl_current_schedule.int_record_id AS RECORD_ID
 			FROM 
 				tbl_current_schedule, tbl_origin
 			WHERE 
-				tbl_origin.txt_location_and_suffix LIKE '%CREWE %'
+				tbl_origin.txt_location_and_suffix LIKE '%{} %'
 			AND 
 				tbl_origin.int_basic_schedule_id = tbl_current_schedule.int_record_id
 			UNION 
@@ -32,7 +42,7 @@ class CreateJson:
 			FROM 
 				tbl_current_schedule, tbl_intermediate
 			WHERE 
-				tbl_intermediate.txt_location_and_suffix LIKE '%CREWE %'
+				tbl_intermediate.txt_location_and_suffix LIKE '%{} %'
 			AND 
 				tbl_intermediate.int_basic_schedule_id = tbl_current_schedule.int_record_id
 			UNION 
@@ -41,10 +51,10 @@ class CreateJson:
 			FROM 
 				tbl_current_schedule, tbl_terminating
 			WHERE 
-				tbl_terminating.txt_location_and_suffix LIKE '%CREWE %'
+				tbl_terminating.txt_location_and_suffix LIKE '%{} %'
 			AND 
 				tbl_terminating.int_basic_schedule_id = tbl_current_schedule.int_record_id
-		"""
+		""".format(self.tiploc, self.tiploc, self.tiploc)
 
 		c = self.db_conn.cursor()
 		c.execute(sql_string)
@@ -52,10 +62,10 @@ class CreateJson:
 			self.schedule_id.append(id[0])
 
 
-
 	def process_schedules(self):
 
-		sched = []
+		all_schedules = []
+
 		for id in self.schedule_id:
 			sql_string = """
 				SELECT
@@ -148,29 +158,21 @@ class CreateJson:
 
 			arr_line = [dest_tiploc, arr_time, "", "", path_in, platform, "", activity]
 
-
-
 			train_description = '{} ({}) {} {} to {} ({})'.format(headcode, toc, dep_line[2], dep_line[0], arr_line[0], arr_line[1])
 
-
-			sched_dict = {"uid": uid, "type": stp, "train_description": train_description, "schedule_line":[dep_line]}
-
+			schedule_dict = {"uid": uid, "type": stp, "train_description": train_description, "schedule_line":[dep_line]}
 			for entry in int_lines:
-				sched_dict['schedule_line'].append(entry)
+				schedule_dict['schedule_line'].append(entry)
+			schedule_dict['schedule_line'].append(arr_line)
 
-			sched_dict['schedule_line'].append(arr_line)
+			all_schedules.append(schedule_dict)
 
-			sched.append(sched_dict)
-
-		with open('train_service.json', 'w') as file:
-			json_output = {"location": "Crewe", "version": 1, "date_created": "2019-04-10", "schedules": []}
-			json_output['schedules'] = sched
+		with open(self.output_file, 'w+') as file:
+			date_now = datetime.now()
+			json_output = {"location": "Crewe", "version": 1, "date_created": str(date_now), "schedules": []}
+			json_output['schedules'] = all_schedules
 			file.write(json.dumps(json_output))
 
-
-
-
-
 if __name__ == "__main__":
-	db = '/home/jmoss2/PycharmProjects/timetable_processor/DFROC2F(A)/DFROC2F(A).db'
-	js = CreateJson(db=db)
+
+	js = CreateJson(args)
