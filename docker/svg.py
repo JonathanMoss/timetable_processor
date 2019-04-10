@@ -131,16 +131,22 @@ class SVGObject:
         height_offset = 4
         text_x_offset = -10
         text_y_offset = 15
+        id_string = '{}_{}'.format(entry['uid'], self.train_count)
         
-        train_plot = self.main_dwg.rect((x - 15, y + y_offset), (width, self.row_height - height_offset), stroke='white', fill='#1f8417', stroke_width='2', rx=8, ry=8).dasharray([2, 2])
+        train_plot = self.main_dwg.rect((x - 15, y + y_offset), (width, self.row_height - height_offset), id=id_string, stroke='white', fill='#1f8417', stroke_width='2', rx=8, ry=8).dasharray([2, 2])
+        evt = 'document.getElementById("{}").addEventListener("click", train_click, false);'.format(id_string, id_string)
         title_text = '{id} ({toc}) {dt} {o} to {dest} ({at})\n\nUID:\t{uid}\nTYPE:\t{schedule}'.format(**entry)
         if entry['lo']:
             title_text += '\nLINE OUT:\t{lo}'.format(**entry)
-
+        script = self.main_dwg.script(content=evt)
         title_text += '\n\nPASS: {d}'.format(**entry)
-        train_plot.set_desc(title=title_text)
+        train_plot.set_desc(title=title_text, desc=entry['uid'])
+        
+        
         self.main_dwg.add(train_plot)
+        self.main_dwg.add(script)
         self.main_dwg.add(self.main_dwg.text(entry['id'], insert=(x + text_x_offset, y + text_y_offset), fill='white', font_size='12px', font_weight='bold', font_family='Arial'))
+        self.train_count += 1
  
     def draw_calling_train(self, arr_x, dep_x, y, width, entry):
 
@@ -148,14 +154,18 @@ class SVGObject:
         height_offset = 4
         text_x_offset = 5
         text_y_offset = 15
+        id_string = '{}_{}'.format(entry['uid'], self.train_count)
 
-        train_plot = self.main_dwg.rect((arr_x, y + y_offset), (width, self.row_height - height_offset), stroke='white', fill='#f45042', stroke_width='2', rx=8, ry=8)
+        train_plot = self.main_dwg.rect((arr_x, y + y_offset), (width, self.row_height - height_offset), id=id_string, stroke='white', fill='#f45042', stroke_width='2', rx=8, ry=8)
+        evt = 'document.getElementById("{}").addEventListener("click", train_click, false);'.format(id_string, id_string)
         title_text = '{id} ({toc}) {dt} {o} to {dest} ({at})\n\nUID:\t{uid}\nTYPE:\t{schedule}'.format(**entry)
         if entry['lo']:
             title_text += '\nLINE OUT:\t{lo}'.format(**entry)
+        script = self.main_dwg.script(content=evt)
         title_text += '\n\nARR: {a}, DEP: {d}'.format(**entry)
         train_plot.set_desc(title=title_text)
         self.main_dwg.add(train_plot)
+        self.main_dwg.add(script)
         self.main_dwg.add(self.main_dwg.text(entry['id'], insert=(arr_x + text_x_offset, y + text_y_offset), fill='white', font_size='12px', font_weight='bold', font_family='Arial'))
 
     def draw_terminating_train(self, x, y, width, entry):
@@ -164,12 +174,16 @@ class SVGObject:
         height_offset = 4
         text_x_offset = 5
         text_y_offset = 15
+        id_string = '{}_{}'.format(entry['uid'], self.train_count)
 
-        train_plot = self.main_dwg.rect((x, y + y_offset), (width, self.row_height - height_offset), stroke='white', fill='white', stroke_width='2', rx=8, ry=8)
+        train_plot = self.main_dwg.rect((x, y + y_offset), (width, self.row_height - height_offset), id=id_string, stroke='white', fill='white', stroke_width='2', rx=8, ry=8)
+        evt = 'document.getElementById("{}").addEventListener("click", train_click, false);'.format(id_string, id_string)
         title_text = '{id} ({toc}) {dt} {o} to {dest} ({at})\n\nUID:\t{uid}\nTYPE:\t{schedule}'.format(**entry)
         title_text += '\n\nARR: {a}'.format(**entry)
         train_plot.set_desc(title=title_text)
+        script = self.main_dwg.script(content=evt)
         self.main_dwg.add(train_plot)
+        self.main_dwg.add(script)
         self.main_dwg.add(self.main_dwg.text(entry['id'], insert=(x + text_x_offset, y + text_y_offset), fill='red', font_size='12px', font_weight='bold', font_family='Arial'))
 
     def draw_starting_train(self, x, y, width, entry):
@@ -178,14 +192,18 @@ class SVGObject:
         height_offset = 4
         text_x_offset = 5
         text_y_offset = 32
+        id_string = '{}_{}'.format(entry['uid'], self.train_count)
 
-        train_plot = self.main_dwg.rect((x - width, y + y_offset), (width, self.row_height - height_offset), stroke='white', fill='white', stroke_width='2', rx=8, ry=8)
+        train_plot = self.main_dwg.rect((x - width, y + y_offset), (width, self.row_height - height_offset), id=id_string, stroke='white', fill='white', stroke_width='2', rx=8, ry=8)
+        evt = 'document.getElementById("{}").addEventListener("click", train_click, false);'.format(id_string, id_string)
         title_text = '{id} ({toc}) {dt} {o} to {dest} ({at})\n\nUID:\t{uid}\nTYPE:\t{schedule}'.format(**entry)
         if entry['lo']:
             title_text += '\nLINE OUT:\t{lo}'.format(**entry)
         title_text += '\n\nDEP: {d}'.format(**entry)
         train_plot.set_desc(title=title_text)
+        script = self.main_dwg.script(content=evt)
         self.main_dwg.add(train_plot)
+        self.main_dwg.add(script)
         self.main_dwg.add(self.main_dwg.text(entry['id'], insert=((x - width) + text_x_offset, y + text_y_offset), fill='green', font_size='12px', font_weight='bold', font_family='Arial'))
 
 
@@ -473,6 +491,7 @@ class SVGObject:
         self.platform_bottom_line = {}
         self.row_height = 0
         self.train_service_dict = {}
+        self.train_count = 0
         
         # Instantiate the 2 svg drawings - one for the index, the other for the docker background (main)
         self.index_dwg = svgwrite.Drawing(id='index_dwg',size=(self.index_svg_width, self.svg_height), profile='tiny')
