@@ -427,16 +427,16 @@ class SVGObject:
         <script>
             function scroll_left() {{
                 // Scroll the current time line into view
-                /*var time_now_x = document.getElementById("time_now").getAttribute('x1');
+                var time_now_x = document.getElementById("time_now").getAttribute('x1');
                 var main_div = document.getElementById("main_div");
                 var svg_width = {};
                 time_line_percentage = (time_now_x / svg_width) * 100;
                 var scrollable = main_div.scrollWidth - main_div.clientWidth;
                 var scroll_left = (time_line_percentage * scrollable) / 100;
-                main_div.scrollLeft = scroll_left;*/
+                main_div.scrollLeft = scroll_left;
 
-                var element = document.getElementById("time_now");
-                element.scrollIntoView({{behaviour: 'smooth', inline: "center"}});
+                /*var element = document.getElementById("time_now");
+                element.scrollIntoView({{behaviour: 'smooth', inline: "center"}});*/
 
             }};
         </script>""".format(self.main_svg_width)
