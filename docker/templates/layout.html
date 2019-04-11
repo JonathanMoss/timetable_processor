@@ -274,24 +274,24 @@
 			margin: auto;
 			padding: 0;
 			border: 1px solid #888;
-			width: 70%;
 			box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
 			animation-name: animatetop;
 			animation-duration: 0.4s
 			height: 300px;
-			min-width: 500px;
+			min-width: 650px;
+			max-width: 650px;
 			overflow-y: auto;
 		}
 
 		table {
 			border-collapse: collapse;
 			font-family: 'Arial';
-			font-size: 15px;
+			font-size: 14px;
 		}
 
 		th {
 			height: 50px;
-			text-align: left;
+			text-align: middle;
 			vertical-align: :middle;
 		}
 		th, td{
@@ -312,37 +312,33 @@
 	</style>
 	
 </head>
-<body>
-
-	{% block content %}{% endblock %}
-
-	<label class="switch">
-  		<input title="Set to keep the timeline in focus" id="track_time" type="checkbox" checked>
-  		<span class="slider round"></span>
-  		<img id="clock_img" src="{{url_for('static', filename='clock.png')}}">
-	</label>
-
-	<script>
-  		(function(){
-    		scroll_tl()
-    		setTimeout(arguments.callee, 1000);
-		})();
-  	</script>
-  	<div id="train_details_modal" class="modal">
-  		<!-- Modal content -->
-	  	<div class="modal-content">
-  <div class="modal-header">
-    <span class="close">&times;</span>
-    <h2 id='modal_header'>Modal Header</h2>
-  </div>
-  <div id="modal_body" class="modal-body">
-    <p>Some text in the Modal Body</p>
-    <p>Some other text...</p>
-  </div>
-  <div class="modal-footer">
-  	<h2 id="modal_footer">Bla, Bla, Bla</h2>
-  </div>
-</div>	
-  	</div>
-</body>
+	<body>
+		{% block content %}{% endblock %}
+		<label class="switch">
+	  		<input title="Set to keep the timeline in focus" id="track_time" type="checkbox" checked>
+	  		<span class="slider round"></span>
+	  		<img id="clock_img" src="{{url_for('static', filename='clock.png')}}">
+		</label>
+		<script>
+	  		(function(){
+	    		scroll_tl()
+	    		setTimeout(arguments.callee, 1000);
+			})();
+	  	</script>
+	  	<div id="train_details_modal" class="modal">
+		  	<div class="modal-content">
+	  			<div class="modal-header">
+	    			<span class="close">&times;</span>
+	    			<h2 id='modal_header'>Modal Header</h2>
+	  			</div>
+	  			<div id="modal_body" class="modal-body">
+	    			<p>Some text in the Modal Body</p>
+	    			<p>Some other text...</p>
+	  			</div>
+	  			<div class="modal-footer">
+	  				<h2 id="modal_footer">Bla, Bla, Bla</h2>
+	  			</div>
+			</div>	
+	  	</div>
+	</body>
 </html>

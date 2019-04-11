@@ -64,7 +64,7 @@ class SVGObject:
         with open('CREWE.csv') as fl:
             for line in fl:
                 details = line.split(',')
-                activity = details[0].strip()
+                activity = details[0].strip()  # CIF Activity.
                 headcode = details[2].strip()
                 platform = details[7].strip()
                 arrival_time = details[9].strip()
@@ -77,8 +77,6 @@ class SVGObject:
                 toc = details[12].strip()
                 dt = details[13].strip()
                 at = details[14].strip()
-
-                #self.trains.append({'lo': line_out, 'schedule': schedule, 'activity': activity, 'id': headcode, 'plt': platform, 'a': arrival_time, 'd': departure_time, 'o': origin, 'dest': dest})
 
                 try:
                     pl = self.train_service_dict[platform]
@@ -98,8 +96,6 @@ class SVGObject:
                     self.train_service_dict[k][item].update({'inbound_time': prev_working_time})
                     prev_working_time = ""
                     
-
-
     def return_x_coordinate(self, time):
 
         offset = 10
@@ -139,7 +135,6 @@ class SVGObject:
         script = self.main_dwg.script(content=evt)
         title_text += '\n\nPASS: {d}'.format(**entry)
         train_plot.set_desc(title=title_text, desc=entry['uid'])
-        
         
         self.main_dwg.add(train_plot)
         self.main_dwg.add(script)
@@ -432,13 +427,16 @@ class SVGObject:
         <script>
             function scroll_left() {{
                 // Scroll the current time line into view
-                var time_now_x = document.getElementById("time_now").getAttribute('x1');
+                /*var time_now_x = document.getElementById("time_now").getAttribute('x1');
                 var main_div = document.getElementById("main_div");
                 var svg_width = {};
                 time_line_percentage = (time_now_x / svg_width) * 100;
                 var scrollable = main_div.scrollWidth - main_div.clientWidth;
                 var scroll_left = (time_line_percentage * scrollable) / 100;
-                main_div.scrollLeft = scroll_left;
+                main_div.scrollLeft = scroll_left;*/
+
+                var element = document.getElementById("time_now");
+                element.scrollIntoView({{behaviour: 'smooth', inline: "center"}});
 
             }};
         </script>""".format(self.main_svg_width)
