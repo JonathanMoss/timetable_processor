@@ -91,7 +91,6 @@ class SVGObject:
 
         prev_working_time = ''
         for k, v in self.train_service_dict.items():
-            #print(f'\nPlatform/Line: {k}')
             for item in v:
                 if v[item]['activity'] == 'TF':
                     prev_working_time = v[item]['a']
@@ -99,7 +98,6 @@ class SVGObject:
                     self.train_service_dict[k][item].update({'inbound_time': prev_working_time})
                     prev_working_time = ""
                     
-        pp.pprint(self.train_service_dict)
 
 
     def return_x_coordinate(self, time):
@@ -133,7 +131,7 @@ class SVGObject:
         text_y_offset = 15
         id_string = '{}_{}'.format(entry['uid'], self.train_count)
         
-        train_plot = self.main_dwg.rect((x - 15, y + y_offset), (width, self.row_height - height_offset), id=id_string, stroke='white', fill='#1f8417', stroke_width='2', rx=8, ry=8).dasharray([2, 2])
+        train_plot = self.main_dwg.rect((x - 15, y + y_offset), (width, self.row_height - height_offset), class_='train_plot', id=id_string, stroke='white', fill='#1f8417', stroke_width='2', rx=8, ry=8).dasharray([2, 2])
         evt = 'document.getElementById("{}").addEventListener("click", train_click, false);'.format(id_string, id_string)
         title_text = '{id} ({toc}) {dt} {o} to {dest} ({at})\n\nUID:\t{uid}\nTYPE:\t{schedule}'.format(**entry)
         if entry['lo']:
@@ -147,7 +145,7 @@ class SVGObject:
         self.main_dwg.add(script)
         self.main_dwg.add(self.main_dwg.text(entry['id'], insert=(x + text_x_offset, y + text_y_offset), fill='white', font_size='12px', font_weight='bold', font_family='Arial'))
         self.train_count += 1
- 
+
     def draw_calling_train(self, arr_x, dep_x, y, width, entry):
 
         y_offset = 2
@@ -156,7 +154,7 @@ class SVGObject:
         text_y_offset = 15
         id_string = '{}_{}'.format(entry['uid'], self.train_count)
 
-        train_plot = self.main_dwg.rect((arr_x, y + y_offset), (width, self.row_height - height_offset), id=id_string, stroke='white', fill='#f45042', stroke_width='2', rx=8, ry=8)
+        train_plot = self.main_dwg.rect((arr_x, y + y_offset), (width, self.row_height - height_offset), class_='train_plot', id=id_string, stroke='white', fill='#f45042', stroke_width='2', rx=8, ry=8)
         evt = 'document.getElementById("{}").addEventListener("click", train_click, false);'.format(id_string, id_string)
         title_text = '{id} ({toc}) {dt} {o} to {dest} ({at})\n\nUID:\t{uid}\nTYPE:\t{schedule}'.format(**entry)
         if entry['lo']:
@@ -167,6 +165,7 @@ class SVGObject:
         self.main_dwg.add(train_plot)
         self.main_dwg.add(script)
         self.main_dwg.add(self.main_dwg.text(entry['id'], insert=(arr_x + text_x_offset, y + text_y_offset), fill='white', font_size='12px', font_weight='bold', font_family='Arial'))
+        self.train_count += 1
 
     def draw_terminating_train(self, x, y, width, entry):
 
@@ -176,7 +175,7 @@ class SVGObject:
         text_y_offset = 15
         id_string = '{}_{}'.format(entry['uid'], self.train_count)
 
-        train_plot = self.main_dwg.rect((x, y + y_offset), (width, self.row_height - height_offset), id=id_string, stroke='white', fill='white', stroke_width='2', rx=8, ry=8)
+        train_plot = self.main_dwg.rect((x, y + y_offset), (width, self.row_height - height_offset), class_='train_plot', id=id_string, stroke='white', fill='white', stroke_width='2', rx=8, ry=8)
         evt = 'document.getElementById("{}").addEventListener("click", train_click, false);'.format(id_string, id_string)
         title_text = '{id} ({toc}) {dt} {o} to {dest} ({at})\n\nUID:\t{uid}\nTYPE:\t{schedule}'.format(**entry)
         title_text += '\n\nARR: {a}'.format(**entry)
@@ -185,6 +184,7 @@ class SVGObject:
         self.main_dwg.add(train_plot)
         self.main_dwg.add(script)
         self.main_dwg.add(self.main_dwg.text(entry['id'], insert=(x + text_x_offset, y + text_y_offset), fill='red', font_size='12px', font_weight='bold', font_family='Arial'))
+        self.train_count += 1
 
     def draw_starting_train(self, x, y, width, entry):
 
@@ -194,7 +194,7 @@ class SVGObject:
         text_y_offset = 32
         id_string = '{}_{}'.format(entry['uid'], self.train_count)
 
-        train_plot = self.main_dwg.rect((x - width, y + y_offset), (width, self.row_height - height_offset), id=id_string, stroke='white', fill='white', stroke_width='2', rx=8, ry=8)
+        train_plot = self.main_dwg.rect((x - width, y + y_offset), (width, self.row_height - height_offset), class_='train_plot', id=id_string, stroke='white', fill='white', stroke_width='2', rx=8, ry=8)
         evt = 'document.getElementById("{}").addEventListener("click", train_click, false);'.format(id_string, id_string)
         title_text = '{id} ({toc}) {dt} {o} to {dest} ({at})\n\nUID:\t{uid}\nTYPE:\t{schedule}'.format(**entry)
         if entry['lo']:
@@ -205,7 +205,7 @@ class SVGObject:
         self.main_dwg.add(train_plot)
         self.main_dwg.add(script)
         self.main_dwg.add(self.main_dwg.text(entry['id'], insert=((x - width) + text_x_offset, y + text_y_offset), fill='green', font_size='12px', font_weight='bold', font_family='Arial'))
-
+        self.train_count += 1
 
     def draw_assoc(self, x1, x2, y):
 
@@ -432,12 +432,16 @@ class SVGObject:
         <script>
             function scroll_left() {{
                 // Scroll the current time line into view
-                var element = document.getElementById("main_div");
-                var maxScrollLeft = element.scrollWidth - element.clientWidth; // Get the maximum scrollable value
-                var x = (maxScrollLeft / 100) * {};  // Calculate the ratio value from the SVG
-                element.scrollLeft = x + (element.clientWidth / 2); // Scroll left
+                var time_now_x = document.getElementById("time_now").getAttribute('x1');
+                var main_div = document.getElementById("main_div");
+                var svg_width = {};
+                time_line_percentage = (time_now_x / svg_width) * 100;
+                var scrollable = main_div.scrollWidth - main_div.clientWidth;
+                var scroll_left = (time_line_percentage * scrollable) / 100;
+                main_div.scrollLeft = scroll_left;
+
             }};
-        </script>""".format((100 / self.main_svg_width) * self.scroll_left)
+        </script>""".format(self.main_svg_width)
         return re.sub(r" {2,}|\t", "", js_string.strip())    
 
     def return_auto_scroll_js(self):

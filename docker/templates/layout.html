@@ -26,6 +26,7 @@
     						train_service_modal.style.display = "none";
   						}	
     				}
+
  				}, 2000);	
 			});
 		});
@@ -57,18 +58,23 @@
  				for (var j = 0; j < schedule['schedule_line'][i].length; j++) {
  					var tabCell = tr.insertCell(-1);
  					tabCell.innerHTML = schedule['schedule_line'][i][j];
- 				}
+ 					if (schedule['schedule_line'][i][j] == 'CREWE') {
+						tr.setAttribute('class', 'highlight');
+					}
+				}
 			}
 
 			container = document.getElementById("modal_body");
 			container.innerHTML = "";
 			container.appendChild(table);
+
+			el = document.getElementsByClassName('highlight')[0];
+			el.scrollIntoView({block: 'center'});
  		}
 
 		function train_click(evt) {
 			
 			var tgt = evt.target.id;
-			console.log(tgt.substring(0, 6));
 			var schedules = train_service_json.schedules;
 			for (var i = 0; i < schedules.length; i++) {
 				if (schedules[i]['uid'] == tgt.substring(0, 6)) {
@@ -82,6 +88,22 @@
 	</script>
 	<style>
 
+		.train_plot {
+			cursor: pointer;
+		}
+
+		.train_plot:hover{
+			opacity: 0.5;
+			fill: grey;
+			position: relative;
+
+		}
+
+		.highlight {
+			background-color: yellow;
+			font-weight: bold;
+			font-style: italic;
+		}
 		.platform_text {
 			stroke: none;
 			fill: white;
