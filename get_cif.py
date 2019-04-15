@@ -39,21 +39,30 @@ class GetCif:
 
     @staticmethod
     def reset_list(date_time_now):
+
+        for the_file in os.listdir(GetCif.cif_folder):
+            file_path = os.path.join(GetCif.cif_folder, the_file)
+            try:
+                if os.path.isfile(file_path):
+                    os.remove(file_path)
+                    print('Removed "{}"'.format(file_path))
+            except Exception as e:
+                print(e)
         file_list = []
         today = date_time_now
-        #today = datetime(2019, 4, 19, 20, 28, 00)
+        #today = datetime(2019, 4, 18, 20, 28, 00)
         last_friday = today + relativedelta(weekday=FR(-1))
         delta = today - last_friday
         if delta.days > 0:
             for d in range(0, delta.days):
                 if d == 0:
-                    file_list.append('toc-full.CIF.gz')
+                    file_list.append({'full': True})
                 else:
                     day = last_friday + timedelta(days=d)
                     day = day.strftime('%a').lower()
-                    file_list.append(f'toc-update-{day}.CIF.gz')
+                    file_list.append({'cif_day': day})
         else:
-            file_list.append('toc-full.CIF.gz')
+            file_list.append({'full': True})
            
         return file_list
 
@@ -101,13 +110,11 @@ class GetCif:
             try:
                 if os.path.isfile(file_path):
                     os.remove(file_path)
-                    print('Removed {}'.format(file_path))
+                    print('Removed "{}"'.format(file_path))
             except Exception as e:
                 print(e)
 
-    def download_cif(self, arguments, **kwargs):
-
-        lst = kwargs.get('lst')
+    def download_cif(self, arguments):
 
         try:
             with requests.get(GetCif.url, 
@@ -153,22 +160,36 @@ class GetCif:
         with gzip.open(self.tmp_path, 'rb') as f_in:
             with open(new_cif_fn, 'wb') as f_out:
                 shutil.copyfileobj(f_in, f_out)
-                print(f'CIF uncompressed to {new_cif_fn}')             
+                print(f'CIF uncompressed to "{new_cif_fn}"')             
 
         if not keep:
             if os.path.isfile(self.tmp_path):
                 os.remove(self.tmp_path)
-                print(f'Removed temporary file: {self.tmp_path}')
+                print(f'Removed temporary file: "{self.tmp_path}"')
 
 
 if __name__ == '__main__':
     
+    GetCif.clear_folder()
+
     if args.reset:
+
+        # Get a list of what is needed to reset the schedule database.
         l = GetCif.reset_list(datetime.now())
         for fn in l:
-            cif = GetCif(args.day, ls = l)
+            try:
+                if fn['full']:
+                    cif = GetCif(full_cif=True)
+            except Exception as e:
+                cif = GetCif(fn['cif_day'], full_cif=False)
+            finally:
+                cif.download_cif(args)
+                if not args.compressed:
+                    cif.unzip_file(args.keep)
+        exit()
+
     if args.full:
-        cif = GetCif(args.day, full_cif=True)
+        cif = GetCif(full_cif=True)
     else:
         cif = GetCif(args.day, full_cif=False)
     if args.quiet:
@@ -176,7 +197,6 @@ if __name__ == '__main__':
     else:
         cif.show_progress = True
 
-    cif.clear_folder()
     cif.download_cif(args)
     
     if not args.compressed:
