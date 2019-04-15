@@ -7,7 +7,22 @@ from db_access import DBConnection
 import re
 import time
 import datetime
+import argparse
 
+
+# Add argument parser
+parser = argparse.ArgumentParser(description='Process the CIF file into the database')
+group = parser.add_mutually_exclusive_group()
+group.add_argument('-s', '--search', action='store_true', help='Automatically search for and process CIF files sitting in the /cif/ folder.')
+group.add_argument('-f', '--file', action='store', help='Process a single cif file that resides in the /cif/ folder.')
+group.add_argument('-n', '--names-list', nargs='+', default=[], help='Provide a list of comma seperated CIF files that reside in /cif/ to process.')
+args = parser.parse_args()
+
+# Run a check to see if at least one argument was passed - if not, exit!
+check = vars(parser.parse_args())
+if not any(check.values()):
+	print('No arguments passed - not sure what you want me to do...')
+	exit()
 
 class CifExtract:
 
@@ -23,10 +38,25 @@ class CifExtract:
     CIF_DB = './cif_record.db'  # The DB that is used to record downloaded CIF.gz and current database references.
     CIF_DIR = './cif'  # The directory that contains the un-archived CIF files.
 
-    def __init__(self, file_name):
+    def __init__(self, args):
+
+    	# If the user want to search the CIF directory
+        if args.search:
+            self.list_of_cifs = self.return_list_of_files()
+        else:
+        	self.list_of_cifs = []
+
+        # If the user has provided a single CIF filename
+        if args.file:
+        	self.cif_file = args.file
+        else:
+        	self.cif_file = None
+
+        # If the user has given a list of CIF files to process
+        if args.names_list:
+        	self.list_of_cifs = args.names_list
 
         # PATHS
-        self.cif_file = file_name
         self.cif_dir = None
         self.working_dir = None
         self.db_file = None
@@ -65,7 +95,21 @@ class CifExtract:
         self.full_cif = False
 
         # Start the processing - get the header record
-        self.get_header()
+        if self.list_of_cifs:
+        	for cif in self.list_of_cifs:
+        		print(cif)
+        		self.cif_file = os.path.join(CifExtract.CIF_DIR, cif)
+        		self.get_header()
+       	else:
+       		self.cif_file = os.path.join(CifExtract.CIF_DIR, self.cif_file)
+       		self.get_header()
+
+
+    def return_list_of_files(self):
+
+        path = CifExtract.CIF_DIR
+        mtime = lambda f: os.stat(os.path.join(path, f)).st_mtime
+        return list(sorted(os.listdir(path), key=mtime))
 
     def grep(self, search_string):
 
@@ -86,14 +130,14 @@ class CifExtract:
             logging.debug('CIF found... {}'.format(self.cif_file))
         else:
             # CIF does not exist - cannot continue!
-            logging.error('{} is not a valid file (no header record found), exiting...'.format(self.cif_file))
-            exit()
+            logging.error('{} is not a valid CIF file, cannot continue...'.format(self.cif_file))
+            return
 
         logging.debug('Looking for header record in {}'.format(self.cif_file))
         header = self.grep('^HD')  # Grep the file and return the header record.
 
         if len(header) == 81:  # Check the header record contains the specified length & parse.
-            logging.debug('Header found in {}, parsing...'.format(self.cif_file))
+            logging.debug('Header record found in {}, parsing...'.format(self.cif_file))
 
             # Parse header record...
             record_identity = header[0:2]
@@ -105,6 +149,8 @@ class CifExtract:
             update_indicator = header[46]
             if update_indicator == 'F':
                 self.full_cif = True  # Needed as some of the code is different for full or update CIF.
+            else:
+            	self.full_cif = False
             version = header[47]
             start_date = header[48:54]
             end_date = header[54:60]
@@ -130,8 +176,8 @@ class CifExtract:
                                                    start_date,
                                                    end_date))
 
-            self.db_file = '{}({}).db'.format(current_file_reference, version)
-            self.db_directory = os.path.join(self.working_dir, '{}({})'.format(current_file_reference, version))
+            self.db_file = '{}.db'.format(current_file_reference)
+            self.db_directory = os.path.join(self.working_dir, '{}'.format(current_file_reference))
 
             # Check if the CIF has already been processed - check CIF_DB
             self.cif_db_conn = DBConnection(CifExtract.CIF_DB)
@@ -191,7 +237,7 @@ class CifExtract:
                     # Attempting to process CIF update out of sequence, cannot continue.
                     if conflicting_version:
                         logging.error('Attempting to process out of sequence CIF, cannot continue...')
-                        exit()
+                        return 
                     else:
                         self.cif_record_header = self.cif_db_conn.execute_sql(self.cif_db_conn.format_sql("""INSERT INTO `tbl_header` 
                                         (`txt_mainframe_id`, 
@@ -217,7 +263,7 @@ class CifExtract:
                 else:
                     # Same Reference, Same Version - has already been processed. 
                     logging.error('Attempting to process same CIF version again; cannot continue...')
-                    exit()
+                    return
 
             if self.full_cif:
                 if not os.path.isdir(self.db_directory):
@@ -235,7 +281,7 @@ class CifExtract:
                     answer = input('This CIF has already been processed, continue? (YES/NO) ')
                     if answer != 'YES':
                         logging.warning('CIF already processed, user elected to exit')
-                        exit()
+                        return 
                     else:
                         logging.warning('User elected to re-run CIF, deleting tables')
                         self.db_conn = DBConnection(os.path.join(self.db_directory, self.db_file))
@@ -249,10 +295,10 @@ class CifExtract:
             # Write a text file that contains the header record information
             if self.full_cif:
                 file_name = 'HEADER.TXT'  # Full CIF
-                fp = os.path.join(self.working_dir, '{}({})'.format(current_file_reference,
-                                                                     version), file_name)
+                fp = os.path.join(self.working_dir, '{}'.format(current_file_reference
+                                                                     ), file_name)
             else:  # Update CIF
-                file_name = '{}({}).txt'.format(current_file_reference, version)
+                file_name = '{}.txt'.format(current_file_reference)
                 fp = os.path.join(self.working_dir, file_name)
 
             with open(fp, 'w') as header_file:
@@ -291,7 +337,7 @@ class CifExtract:
         else:
 
             logging.error('No valid header file found in {}, exiting programme'.format(self.cif_file))
-            exit()
+            return 
 
         # Full CIF - Update the CIF .db to show which full CIF is being used as the base CIF.
         if self.full_cif:
@@ -724,9 +770,4 @@ class CifExtract:
 
 if __name__ == "__main__":
 
-    # cif_files = ['toc-full.cif', 'toc-update-sat.cif', 'toc-update-sun.cif', 'toc-update-mon.cif']
-    # cif_files = ['toc-update-sat.cif', 'toc-update-sun.cif', 'toc-update-mon.cif']
-    cif_files = ['toc-update-wed.cif', ]
-    for cif in cif_files:
-        print('Processing {}'.format(cif))
-        CifExtract(os.path.join(CifExtract.CIF_DIR, cif))
+    cif_extract = CifExtract(args)
