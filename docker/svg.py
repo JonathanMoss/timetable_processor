@@ -350,7 +350,7 @@ class SVGObject:
         now = datetime.now()  # Get the current time
         # now = datetime.strptime('00:00', "%H:%M")  # For testing TODO: Remove in production
         start_time = self.start_time.replace(year=now.year, month=now.month, day=now.day)  # Get the Docker start time.
-t        tm_between = now - start_time  # Calculate how long has passed from start time
+        tm_between = now - start_time  # Calculate how long has passed from start time
         range_time = int(tm_between.total_seconds() / 60)  # Work out the total minutes.
         x = (self.ticks * range_time) + 10   # Time the minutes * ticks.
         self.scroll_left = x
@@ -368,7 +368,7 @@ t        tm_between = now - start_time  # Calculate how long has passed from sta
 
     def create_platform_index(self):
 
-        """This function creates the platform index SVG"""t
+        """This function creates the platform index SVG"""
 
         total_sep = len(self.platforms) - 1  # The number of separators we need.
         total_sep_pixels = self.seperator_line_height * total_sep  # How many pixels are taken up by the separator
