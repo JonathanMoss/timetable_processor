@@ -1,7 +1,17 @@
 import subprocess
-def return_sql(tiploc): 
+import argparse
 
-    p = subprocess.Popen(['xclip','-selection','clipboard'], stdin=subprocess.PIPE)
+parser = argparse.ArgumentParser(description='Create an SQL file containing a line-up query for the provided TIPLOC.')
+parser.add_argument('-t', '--tiploc', help='Provide a single TIPLOC to base the line-up on.', required=True)
+group = parser.add_mutually_exclusive_group()
+group.add_argument('-c', '--clipboard', action='store_true', help='Output SQL to the clipboard only')
+group.add_argument('-f', '--file', help='Output the sql to a named *.sql file (full path needed)')
+group.add_argument('-s', '--std_out', action='store_true', help='Output the sql to stdout')
+args = parser.parse_args()
+
+def return_sql(tiploc, clipboard=False, output_file=None, std_out=False): 
+
+    """ e.g. python3 line_up.py -t CREWE -f crewe.sql """
 
     sql_string = """
     SELECT
@@ -136,10 +146,19 @@ def return_sql(tiploc):
     AND tbl_extra_schedule.int_basic_id = tbl_current_schedule.int_record_id
     ORDER BY SortTime""".format(tiploc, tiploc, tiploc)
 
-    p.stdin.write(sql_string.encode('utf-8'))
-    p.stdin.close()
-    retcode = p.wait()
-    print('Copied to Clipboard...')
+    if clipboard:
+        p = subprocess.Popen(['xclip','-selection','clipboard'], stdin=subprocess.PIPE)
+        p.stdin.write(sql_string.encode('utf-8'))
+        p.stdin.close()
+        retcode = p.wait()
+        print('Copied to Clipboard...')
+    elif output_file:
+        with open(output_file, 'w+') as f:
+            f.write(sql_string)
+    elif std_out:
+        print(sql_string)
 
 if __name__ == '__main__':
-    print(return_sql('CREWE'))
+    return_sql(tiploc=args.tiploc, clipboard=args.clipboard, output_file=args.file, std_out=args.std_out)
+
+    # python3 line_up.py -t CREWE -f crewe.sql
