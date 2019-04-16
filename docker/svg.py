@@ -11,7 +11,6 @@ pp = pprint.PrettyPrinter(indent=4)
 
 class SVGObject:
 
-    # JSON = '{"platforms": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14], "start_time": "00:00", "end_time": "23:00"}'
     PLATFORM_TYPE = {'1': ['Up Facing Bay - Left hand platform', ],
                      '2': ['Up Facing Bay - Right hand platform', ],
                      '3': ['Down Facing Bay - Left hand platform', ],
@@ -56,8 +55,6 @@ class SVGObject:
            '[12, "Platform 12", 10, 424, 432, "PF-A"]], ' \
            '"start_time": "00:00", ' \
            '"end_time": "23:59"}'
-
-    # JSON = '{"platforms": [1, 2, 3, 4, 5]}'
 
     def parse_csv(self):
 

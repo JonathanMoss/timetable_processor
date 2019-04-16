@@ -14,26 +14,18 @@ if __name__ == '__main__':
     with sqlite3.connect(CIF_DB) as con:
         c = con.cursor()
 
-        sql_string = \
-        """
+        sql_string = """
+        DROP TABLE IF EXISTS `tbl_current_cif`; 
         CREATE TABLE IF NOT EXISTS `tbl_current_cif` 
             (`txt_current_cif` TEXT NOT NULL);
-        """
-        c.execute(format_sql(sql_string))
-
-        sql_string = \
-        """
+        DROP TABLE IF EXISTS `tbl_downloaded_cif`;
         CREATE TABLE IF NOT EXISTS `tbl_downloaded_cif` 
             (`int_index` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, 
             `txt_filename` TEXT NOT NULL, 
             `txt_date_time` TEXT NOT NULL, 
             `int_success` INTEGER NOT NULL, 
-            `txt_arguments` TEXT NOT NULL)
-        """
-        c.execute(format_sql(sql_string))
-
-        sql_string = \
-        """
+            `txt_arguments` TEXT NOT NULL);
+        DROP TABLE IF EXISTS `tbl_header`;
         CREATE TABLE IF NOT EXISTS `tbl_header` 
             (`int_record_id` INTEGER PRIMARY KEY AUTOINCREMENT, 
             `txt_mainframe_id` TEXT ( 20 ) NOT NULL, 
@@ -46,12 +38,8 @@ if __name__ == '__main__':
             `txt_start_date` TEXT ( 6 ) NOT NULL, 
             `txt_end_date` TEXT ( 4 ) NOT NULL, 
             `time_process_timestamp` DATETIME DEFAULT CURRENT_TIMESTAMP, 
-            `int_complete` INTEGER DEFAULT 0)
-        """
-        c.execute(format_sql(sql_string))
-
-        sql_string = \
-        """
+            `int_complete` INTEGER DEFAULT 0);
+        DROP TABLE IF EXISTS `tbl_header_stats`;
         CREATE TABLE IF NOT EXISTS `tbl_header_stats`
             (`int_record_id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
             `int_header_record_id` INTEGER NOT NULL,
@@ -67,7 +55,7 @@ if __name__ == '__main__':
             `int_AA_rev` INTEGER NOT NULL,
             `int_AA_proc` INTEGER NOT NULL,
             `int_BS` INTEGER NOT NULL,
-            `int_BS_proc` INTEGER NOT NULL)
+            `int_BS_proc` INTEGER NOT NULL);
         """
-        c.execute(format_sql(sql_string))
+        c.executescript(format_sql(sql_string))
         con.commit()
