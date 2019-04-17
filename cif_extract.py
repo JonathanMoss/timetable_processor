@@ -652,8 +652,8 @@ class CifExtract:
         stdout, stderr = process.communicate()
         schedules = stdout.decode('utf-8')
 
-        # *** Temporary code to see if the RPI memory error can be sorted.
-        with open (os.path.join(CifExtract.TMP_DIR, 'tmp',), 'w+') as f:
+        #*** Temporary code to see if the RPI memory error can be sorted.
+        with open (os.path.join(CifExtract.TMP_DIR, 'tmp'), 'w+') as f:
             f.write(schedules)
             logging.debug(f'{schedule_count} Schedules written to temporary file')
 
