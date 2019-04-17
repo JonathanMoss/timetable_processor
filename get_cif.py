@@ -1,7 +1,6 @@
 import requests
 import os
 import shutil
-import sys
 import gzip
 from datetime import datetime, timedelta
 import argparse
@@ -9,19 +8,27 @@ import sqlite3
 import re
 from progress.bar import Bar
 from dateutil.relativedelta import relativedelta, FR
-
+import subprocess
 
 parser = argparse.ArgumentParser(description='Download CIF files from Network Rail.')
 group = parser.add_mutually_exclusive_group()
-group.add_argument('-f', '--full', action='store_true', help='Download full CIF')
-group.add_argument('-u', '--update', action='store_true', help='Download CIF update (default action)')
-group.add_argument('-r', '--reset', action='store_true', help='Download the Full CIF and all relevant updates')
-parser.add_argument('-q', '--quiet', action='store_true', help='Suppress progress bar')
-parser.add_argument('-c', '--compressed', action='store_true',
-                    help='CIF remains compressed - not unzipped and placed into CIF folder')
-parser.add_argument('-d', '--day',choices=['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'],
+group.add_argument('-f', '--full',
+                   action='store_true',
+                   help='Download full CIF')
+group.add_argument('-u', '--update',
+                   action='store_true',
+                   help='Download CIF update (default action)')
+group.add_argument('-r', '--reset',
+                   action='store_true',
+                   help='Download the Full CIF and all relevant updates')
+parser.add_argument('-q', '--quiet',
+                    action='store_true',
+                    help='Suppress progress bar')
+parser.add_argument('-d', '--day',
+                    choices=['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'],
                     help='Override the automatic day selection (forces -u)')
-parser.add_argument('-k', '--keep', action='store_true',
+parser.add_argument('-k', '--keep',
+                    action='store_true',
                     help='Do not delete the downloaded cif from "/tmp" after unzip operation')
 args = parser.parse_args()
 
@@ -50,7 +57,6 @@ class GetCif:
                 print(e)
         file_list = []
         today = date_time_now
-        #today = datetime(2019, 4, 18, 20, 28, 00)
         last_friday = today + relativedelta(weekday=FR(-1))
         delta = today - last_friday
         if delta.days > 0:
@@ -63,18 +69,26 @@ class GetCif:
                     file_list.append({'cif_day': day})
         else:
             file_list.append({'full': True})
-           
+
         return file_list
 
-    def __init__(self, cif_day=None, full_cif=False):
+    def __init__(self, cif_day=None, full_cif=False, arguments=None):
+
         self.full_cif = full_cif
         self.show_progress = True
         self.downloaded_cif = ""
         self.tmp_path = ""
+        self.hd = {}
+        self.arguments = arguments
+        self.file_size_compressed = ""
+        self.file_size_uncompressed = ""
+        self.uncompressed_file_path = ""
 
         if cif_day is None:
             self.yesterday = datetime.today() - timedelta(days=1)
             self.yesterday = self.yesterday.strftime('%a').lower()
+
+        # Set the connection parameters based on the CIF type - full bleed or update.
 
             if self.full_cif:
                 self.params = (
@@ -101,9 +115,10 @@ class GetCif:
 
             self.downloaded_cif = self.params[1][1]
             self.tmp_path = os.path.join(GetCif.folder, self.downloaded_cif)
-  
-    @staticmethod
-    def clear_folder():
+
+    def clear_folder(self):
+
+        """ This function clears out the CIF folder. """
 
         for the_file in os.listdir(GetCif.folder):
             file_path = os.path.join(GetCif.folder, the_file)
@@ -114,14 +129,17 @@ class GetCif:
             except Exception as e:
                 print(e)
 
-    def download_cif(self, arguments):
+    def download_cif(self):
+
+        """ This is the function that actually downloads the CIF - showing a progress bar (if not supressed). """
 
         try:
-            with requests.get(GetCif.url, 
-                              allow_redirects=True, 
-                              params=self.params, 
+            with requests.get(GetCif.url,
+                              allow_redirects=True,
+                              params=self.params,
                               auth=(GetCif.username, GetCif.password), stream=True) as r:
                 total_length = int(r.headers['Content-Length'])
+                self.file_size_compressed = self.sizeof_fmt(total_length)
                 dl = 0
                 with open(self.tmp_path, 'wb') as f:
                     bar = Bar('Downloading {}'.format(self.tmp_path), max=total_length, suffix='%(percent)d%%')
@@ -129,7 +147,7 @@ class GetCif:
                         if chunk:
                             dl += len(chunk)
                             if self.show_progress:
-                                bar.index=dl
+                                bar.index = dl
                                 bar.next()
                             f.write(chunk)
             bar.finish()
@@ -137,67 +155,151 @@ class GetCif:
 
         except Exception as e:
             print(e)
-        finally:
-            # Update Database
-            sql_string = """
-            INSERT into `tbl_downloaded_cif` 
-                (`txt_filename`, 
-                `txt_date_time`, 
-                `int_success`, 
-                `txt_arguments`) 
-            VALUES ("{}", datetime("now"), 1, "{}");""".format(self.downloaded_cif, str(arguments))
-            sql_string = re.sub(r" {2,}|\n", "", sql_string.strip())
-            conn = sqlite3.connect(GetCif.db_file_name)
-            conn.execute(sql_string)
-            conn.commit()
-            conn.close()
+
+    def sizeof_fmt(self, num, suffix='B'):
+
+        """ This function returns human readable representation of a file size specified as an argument. """
+
+        for unit in ['', 'Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei', 'Zi']:
+            if abs(num) < 1024.0:
+                return "%3.1f%s%s" % (num, unit, suffix)
+            num /= 1024.0
+        return "%.1f%s%s" % (num, 'Yi', suffix)
 
     def unzip_file(self, keep=False):
 
+        """ This function uncompresses the CIF file, if keep is True, the .gz file is kept, otherwise deleted. """
+
         print(f'Uncompressing {self.downloaded_cif}...')
-        new_cif_fn = os.path.join(GetCif.cif_folder, str(self.downloaded_cif).lower()[0:-3])
+        self.uncompressed_file_path = os.path.join(GetCif.cif_folder, str(self.downloaded_cif).lower()[0:-3])
 
         with gzip.open(self.tmp_path, 'rb') as f_in:
-            with open(new_cif_fn, 'wb') as f_out:
+            with open(self.uncompressed_file_path, 'wb') as f_out:
                 shutil.copyfileobj(f_in, f_out)
-                print(f'CIF uncompressed to "{new_cif_fn}"')             
-
+                print(f'CIF uncompressed to "{self.uncompressed_file_path}"')
+                self.file_size_uncompressed = self.sizeof_fmt(os.path.getsize(self.uncompressed_file_path))
         if not keep:
             if os.path.isfile(self.tmp_path):
                 os.remove(self.tmp_path)
                 print(f'Removed temporary file: "{self.tmp_path}"')
 
+    def update_db(self):
 
-if __name__ == '__main__':
-    
-    GetCif.clear_folder()
+        """ This function updates the cif_record.db records """
 
-    if args.reset:
+        sql_string = """
+            INSERT into `tbl_downloaded_cif`
+                (`txt_filename`,
+                `txt_uncompressed_filename`,
+                `txt_date_time`,
+                `int_success`,
+                `txt_arguments`,
+                `txt_mainframe_id`,
+                `txt_extract_date`,
+                `txt_extract_time`,
+                `txt_current_file_ref`,
+                `txt_last_file_ref`,
+                `txt_update_indicator`,
+                `txt_version`,
+                `txt_start_date`,
+                `txt_end_date`,
+                `txt_uncompressed_size`,
+                `txt_compressed_size`)
+                VALUES ("{}", "{}", "{}", 1, "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}");""".format(
+                    self.downloaded_cif,
+                    self.uncompressed_file_path,
+                    datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                    self.arguments,
+                    self.hd['mainframe_identity'],
+                    self.hd['date_of_extract'],
+                    self.hd['time_of_extract'],
+                    self.hd['current_file_reference'],
+                    self.hd['last_file_reference'],
+                    self.hd['update_indicator'],
+                    self.hd['version'],
+                    self.hd['start_date'],
+                    self.hd['end_date'],
+                    self.file_size_uncompressed,
+                    self.file_size_compressed)
+        sql_string = re.sub(r" {2,}|\n", "", sql_string.strip())
+        conn = sqlite3.connect(GetCif.db_file_name)
+        conn.execute(sql_string)
+        conn.commit()
+        conn.close()
 
-        # Get a list of what is needed to reset the schedule database.
-        l = GetCif.reset_list(datetime.now())
+    def grep(self, file, search_string):
+
+        """This function runs a grep process as return the resulting matches"""
+
+        process = subprocess.Popen(['grep', search_string, file], stdout=subprocess.PIPE)
+        stdout, stderr = process.communicate()
+        return stdout.decode('utf-8')
+
+    def get_header(self):
+
+        """ This function searches the cif file for a header record and writes it to a dictionary """
+
+        file_path = os.path.join(GetCif.cif_folder, str(self.downloaded_cif).lower()[0:-3])
+        if os.path.isfile(file_path):
+            header = self.grep(file_path, '^HD')
+            if len(header) == 81:
+                self.hd = {'record_identity': header[0:2],
+                           'mainframe_identity': header[2:22],
+                           'date_of_extract': header[22:28],
+                           'time_of_extract': header[28:32],
+                           'current_file_reference': header[32:39],
+                           'last_file_reference': header[39:46],
+                           'update_indicator': header[46],
+                           'version': header[47],
+                           'start_date': header[48:54],
+                           'end_date': header[54:60]}
+
+    @staticmethod
+    def create_db():
+
+        """ This function runs a python script that cleans the cif_record.db """
+
+        process = subprocess.Popen(['python3', 'cif_record.py'], stdout=subprocess.PIPE)
+        stdout, stderr = process.communicate()
+
+    @staticmethod
+    def reset(arg):
+
+        """ This function initiates the deletion and re-download of all CIF
+        up to and including the last available full bleed """
+
+        GetCif.create_db()  # Clear the database (i.e. start from fresh)
+        l = GetCif.reset_list(datetime.now())  # Create the list of required CIF files based on today's date.
+
+        # Itterate through the CIF list
         for fn in l:
             try:
                 if fn['full']:
-                    cif = GetCif(full_cif=True)
-            except Exception as e:
-                cif = GetCif(fn['cif_day'], full_cif=False)
+                    reset_cif = GetCif(full_cif=True, arguments=arg)
+            except Exception:
+                reset_cif = GetCif(fn['cif_day'], full_cif=False, arguments=arg)
             finally:
-                cif.download_cif(args)
-                if not args.compressed:
-                    cif.unzip_file(args.keep)
-        exit()
+                reset_cif.clear_folder()
+                reset_cif.download_cif()
+                reset_cif.unzip_file(arg.keep)
+                reset_cif.get_header()
+                reset_cif.update_db()
 
-    if args.full:
-        cif = GetCif(full_cif=True)
-    else:
-        cif = GetCif(args.day, full_cif=False)
-    if args.quiet:
-        cif.show_progress = False
-    else:
-        cif.show_progress = True
+if __name__ == '__main__':
 
-    cif.download_cif(args)
-    
-    if not args.compressed:
+    if args.reset:
+        GetCif.reset(args)
+    else:
+        if args.full:
+            cif = GetCif(full_cif=True, arguments=args)
+        else:
+            cif = GetCif(args.day, full_cif=False, arguments=args)
+        if args.quiet:
+            cif.show_progress = False
+        else:
+            cif.show_progress = True
+
+        cif.download_cif()
         cif.unzip_file(args.keep)
+        cif.get_header()
+        cif.update_db()

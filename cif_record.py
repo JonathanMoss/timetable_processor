@@ -21,10 +21,23 @@ if __name__ == '__main__':
         DROP TABLE IF EXISTS `tbl_downloaded_cif`;
         CREATE TABLE IF NOT EXISTS `tbl_downloaded_cif` 
             (`int_index` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, 
-            `txt_filename` TEXT NOT NULL, 
-            `txt_date_time` TEXT NOT NULL, 
+            `txt_filename` TEXT NOT NULL,
+            `txt_uncompressed_filename` TEXT NOT NULL, 
+            `txt_date_time` TEXT NOT NULL,
+            `txt_processed_date_time` TEXT, 
             `int_success` INTEGER NOT NULL, 
-            `txt_arguments` TEXT NOT NULL);
+            `txt_arguments` TEXT NOT NULL,
+            `txt_mainframe_id` TEXT NOT NULL, 
+            `txt_extract_date` TEXT NOT NULL, 
+            `txt_extract_time` TEXT NOT NULL, 
+            `txt_current_file_ref` TEXT NOT NULL, 
+            `txt_last_file_ref` TEXT NOT NULL,
+            `txt_update_indicator` TEXT NOT NULL,
+            `txt_version` TEXT NOT NULL,
+            `txt_start_date` TEXT NOT NULL,
+            `txt_end_date` TEXT NOT NULL,
+            `txt_uncompressed_size` TEXT NOT NULL,
+            `txt_compressed_size` TEXT NOT NULL);
         DROP TABLE IF EXISTS `tbl_header`;
         CREATE TABLE IF NOT EXISTS `tbl_header` 
             (`int_record_id` INTEGER PRIMARY KEY AUTOINCREMENT, 
