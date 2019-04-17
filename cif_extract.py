@@ -63,6 +63,7 @@ class CifExtract:
         self.working_dir = None
         self.db_file = None
         self.db_directory = None
+        self.short_cif_file = None
 
         # DATABASE
         self.db_conn = None
@@ -99,7 +100,6 @@ class CifExtract:
         # Start the processing - get the header record
         if self.list_of_cifs:
             for cif in self.list_of_cifs:
-                print(cif)
                 self.cif_file = os.path.join(CifExtract.CIF_DIR, cif)
                 self.get_header()
         else:
@@ -127,6 +127,7 @@ class CifExtract:
 
         # Check if the cif file passed at initialisation exists
         if os.path.isfile(self.cif_file):
+            self.short_cif_file = self.cif_file
             self.cif_file = os.path.abspath(self.cif_file)
             self.working_dir = Path(os.path.split(self.cif_file)[0]).parent
             logging.debug('CIF found... {}'.format(self.cif_file))
@@ -715,7 +716,9 @@ class CifExtract:
         total_time = (end_time - start_time)
         if total_time <= 59:
             logging.debug(
-                'Parsed {}/{} schedule records in {:.2f} seconds'.format(total_processed, schedule_count, total_time))
+                'Parsed {}/{} schedule records in {:.2f} seconds'.format(total_processed, 
+                                                                         schedule_count, 
+                                                                         total_time))
         else:
             logging.debug(
                 'Parsed {}/{} schedule records in {:.2f} MM:SS'.format(total_processed, schedule_count,
@@ -772,6 +775,12 @@ class CifExtract:
 
         self.cif_db_conn.execute_sql(sql_string, True)
 
+        sql_string = f"""
+        UPDATE `tbl_downloaded_cif`
+        SET `txt_processed_date_time` = "{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+        WHERE `txt_uncompressed_filename` = "{self.short_cif_file}";
+        """
+        self.cif_db_conn.execute_sql(sql_string, True)
 
 if __name__ == "__main__":
 

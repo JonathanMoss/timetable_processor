@@ -83,6 +83,7 @@ class GetCif:
         self.file_size_compressed = ""
         self.file_size_uncompressed = ""
         self.uncompressed_file_path = ""
+        self.out_of_sequence = False
 
         if cif_day is None:
             self.yesterday = datetime.today() - timedelta(days=1)
@@ -186,46 +187,46 @@ class GetCif:
     def update_db(self):
 
         """ This function updates the cif_record.db records """
-
-        sql_string = """
-            INSERT into `tbl_downloaded_cif`
-                (`txt_filename`,
-                `txt_uncompressed_filename`,
-                `txt_date_time`,
-                `int_success`,
-                `txt_arguments`,
-                `txt_mainframe_id`,
-                `txt_extract_date`,
-                `txt_extract_time`,
-                `txt_current_file_ref`,
-                `txt_last_file_ref`,
-                `txt_update_indicator`,
-                `txt_version`,
-                `txt_start_date`,
-                `txt_end_date`,
-                `txt_uncompressed_size`,
-                `txt_compressed_size`)
-                VALUES ("{}", "{}", "{}", 1, "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}");""".format(
-                    self.downloaded_cif,
-                    self.uncompressed_file_path,
-                    datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                    self.arguments,
-                    self.hd['mainframe_identity'],
-                    self.hd['date_of_extract'],
-                    self.hd['time_of_extract'],
-                    self.hd['current_file_reference'],
-                    self.hd['last_file_reference'],
-                    self.hd['update_indicator'],
-                    self.hd['version'],
-                    self.hd['start_date'],
-                    self.hd['end_date'],
-                    self.file_size_uncompressed,
-                    self.file_size_compressed)
-        sql_string = re.sub(r" {2,}|\n", "", sql_string.strip())
-        conn = sqlite3.connect(GetCif.db_file_name)
-        conn.execute(sql_string)
-        conn.commit()
-        conn.close()
+        if not self.out_of_sequence:
+            sql_string = """
+                INSERT into `tbl_downloaded_cif`
+                    (`txt_filename`,
+                    `txt_uncompressed_filename`,
+                    `txt_date_time`,
+                    `int_success`,
+                    `txt_arguments`,
+                    `txt_mainframe_id`,
+                    `txt_extract_date`,
+                    `txt_extract_time`,
+                    `txt_current_file_ref`,
+                    `txt_last_file_ref`,
+                    `txt_update_indicator`,
+                    `txt_version`,
+                    `txt_start_date`,
+                    `txt_end_date`,
+                    `txt_uncompressed_size`,
+                    `txt_compressed_size`)
+                    VALUES ("{}", "{}", "{}", 1, "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}");""".format(
+                        self.downloaded_cif,
+                        self.uncompressed_file_path,
+                        datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                        self.arguments,
+                        self.hd['mainframe_identity'],
+                        self.hd['date_of_extract'],
+                        self.hd['time_of_extract'],
+                        self.hd['current_file_reference'],
+                        self.hd['last_file_reference'],
+                        self.hd['update_indicator'],
+                        self.hd['version'],
+                        self.hd['start_date'],
+                        self.hd['end_date'],
+                        self.file_size_uncompressed,
+                        self.file_size_compressed)
+            sql_string = re.sub(r" {2,}|\n", "", sql_string.strip())
+            conn = sqlite3.connect(GetCif.db_file_name)
+            conn.execute(sql_string)
+            conn.commit()
+            conn.close()
 
     def grep(self, file, search_string):
 
@@ -253,6 +254,24 @@ class GetCif:
                            'version': header[47],
                            'start_date': header[48:54],
                            'end_date': header[54:60]}
+
+        if 'U' in self.hd['update_indicator']: 
+            if not self.confirm_sequence():
+                print(f'Out of sequence CIF downloaded: {self.downloaded_cif}')
+                self.out_of_sequence = True
+                GetCif.delete_file(file_path)
+            else:
+                self.out_of_sequence = False
+    
+    @staticmethod
+    def delete_file(file_name):
+
+        try:
+            os.remove(file_name)
+        except:
+            print(f'Cannot remove file: {file_name}')
+        else:
+            print(f'{file_name} deleted')
 
     @staticmethod
     def create_db():
@@ -284,7 +303,31 @@ class GetCif:
                 reset_cif.unzip_file(arg.keep)
                 reset_cif.get_header()
                 reset_cif.update_db()
+    
+    def confirm_sequence(self):
+        
+        sql_string = """SELECT tbl_downloaded_cif.txt_current_file_ref, tbl_downloaded_cif.txt_update_indicator FROM tbl_downloaded_cif ORDER BY tbl_downloaded_cif.int_index DESC LIMIT 1"""
+        conn = sqlite3.connect(GetCif.db_file_name)
+        c = conn.cursor()
+        c.execute(sql_string)
+        res = c.fetchone()
+        conn.close()
+        last_letter_db = res[0][-1]
+        next_in_sequence = chr(ord(last_letter_db) + 1)
+        last_update_indicator = res[1]
+        current_letter_cif = self.hd['current_file_reference'][-1]
 
+        if last_update_indicator == 'F':
+            return True
+        
+        if last_letter_db == 'Z' and current_letter_cif == 'A':
+            return True
+        
+        if current_letter_cif == next_in_sequence:
+            return True
+
+        return False
+        
 if __name__ == '__main__':
 
     if args.reset:
