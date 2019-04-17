@@ -11,18 +11,18 @@ import argparse
 
 
 # Add argument parser
-parser = argparse.ArgumentParser(description='Process the CIF file into the database')
-group = parser.add_mutually_exclusive_group()
-group.add_argument('-s', '--search', action='store_true', help='Automatically search for and process CIF files sitting in the /cif/ folder.')
-group.add_argument('-f', '--file', action='store', help='Process a single cif file that resides in the /cif/ folder.')
-group.add_argument('-n', '--names-list', nargs='+', default=[], help='Provide a list of comma seperated CIF files that reside in /cif/ to process.')
-args = parser.parse_args()
+PARSER = argparse.ArgumentParser(description='Process the CIF file into the database')
+GROUP = PARSER.add_mutually_exclusive_group()
+GROUP.add_argument('-s', '--search', action='store_true', help='Automatically search for and process CIF files sitting in the /cif/ folder.')
+GROUP.add_argument('-f', '--file', action='store', help='Process a single cif file that resides in the /cif/ folder.')
+GROUP.add_argument('-n', '--names-list', nargs='+', default=[], help='Provide a list of comma seperated CIF files that reside in /cif/ to process.')
+ARGS = PARSER.parse_args()
 
 # Run a check to see if at least one argument was passed - if not, exit!
-check = vars(parser.parse_args())
-if not any(check.values()):
-	print('No arguments passed - not sure what you want me to do...')
-	exit()
+CHECK = vars(PARSER.parse_args())
+if not any(CHECK.values()):
+    print('No arguments passed - not sure what you want me to do...')
+    exit()
 
 class CifExtract:
 
@@ -37,24 +37,26 @@ class CifExtract:
                         datefmt='%d-%b-%y %H:%M:%S')
     CIF_DB = './cif_record.db'  # The DB that is used to record downloaded CIF.gz and current database references.
     CIF_DIR = './cif'  # The directory that contains the un-archived CIF files.
+    TMP_DIR = './tmp'  # The temporary directory
 
     def __init__(self, args):
 
-    	# If the user want to search the CIF directory
+        # If the user want to search the CIF directory
         if args.search:
-            self.list_of_cifs = self.return_list_of_files()
+            self.list_of_cifs = CifExtract.return_list_of_files()
+            print(self.list_of_cifs)
         else:
-        	self.list_of_cifs = []
+            self.list_of_cifs = []
 
         # If the user has provided a single CIF filename
         if args.file:
-        	self.cif_file = args.file
+            self.cif_file = args.file
         else:
-        	self.cif_file = None
+            self.cif_file = None
 
         # If the user has given a list of CIF files to process
         if args.names_list:
-        	self.list_of_cifs = args.names_list
+            self.list_of_cifs = args.names_list
 
         # PATHS
         self.cif_dir = None
@@ -96,16 +98,16 @@ class CifExtract:
 
         # Start the processing - get the header record
         if self.list_of_cifs:
-        	for cif in self.list_of_cifs:
-        		print(cif)
-        		self.cif_file = os.path.join(CifExtract.CIF_DIR, cif)
-        		self.get_header()
-       	else:
-       		self.cif_file = os.path.join(CifExtract.CIF_DIR, self.cif_file)
-       		self.get_header()
+            for cif in self.list_of_cifs:
+                print(cif)
+                self.cif_file = os.path.join(CifExtract.CIF_DIR, cif)
+                self.get_header()
+        else:
+            self.cif_file = os.path.join(CifExtract.CIF_DIR, self.cif_file)
+            self.get_header()
 
-
-    def return_list_of_files(self):
+    @staticmethod
+    def return_list_of_files():
 
         path = CifExtract.CIF_DIR
         mtime = lambda f: os.stat(os.path.join(path, f)).st_mtime
@@ -150,7 +152,7 @@ class CifExtract:
             if update_indicator == 'F':
                 self.full_cif = True  # Needed as some of the code is different for full or update CIF.
             else:
-            	self.full_cif = False
+                self.full_cif = False
             version = header[47]
             start_date = header[48:54]
             end_date = header[54:60]
@@ -181,23 +183,23 @@ class CifExtract:
 
             # Check if the CIF has already been processed - check CIF_DB
             self.cif_db_conn = DBConnection(CifExtract.CIF_DB)
-            sql_string = 'SELECT COUNT(*) FROM `tbl_header` WHERE `txt_current_file_ref` LIKE "{}";'.format(current_file_reference)
+            sql_string = 'SELECT COUNT (*) FROM `tbl_header` WHERE `txt_current_file_ref` LIKE "{}";'.format(current_file_reference)
             ret_records = self.cif_db_conn.run_select(sql_string)
             if str(ret_records[0][0]).strip() == '0':
                 # No entry in cif_record.db, thus it has not been processed - update database...
                 logging.debug('CIF reference has not been processed, continuing...')
                 self.cif_record_header = self.cif_db_conn.execute_sql(self.cif_db_conn.format_sql("""
-                INSERT INTO 
-                    `tbl_header` ( 
-                        `txt_mainframe_id`, 
-                        `txt_extract_date`, 
-                        `txt_extract_time`, 
-                        `txt_current_file_ref`, 
+                INSERT INTO
+                    `tbl_header` (
+                        `txt_mainframe_id`,
+                        `txt_extract_date`,
+                        `txt_extract_time`,
+                        `txt_current_file_ref`,
                         `txt_last_file_ref`,
                         `txt_update_indicator`,
                         `txt_version`,
                         `txt_start_date`,
-                        `txt_end_date`) 
+                        `txt_end_date`)
                     VALUES (
                         '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}')""".format(mainframe_identity,
                                                                                         date_of_extract,
@@ -213,10 +215,9 @@ class CifExtract:
                 # The CIF reference has already been processed, check version...
                 logging.debug('CIF reference already processed, checking db for version conflicts...')
                 sql_string = """
-                SELECT 
-                    COUNT(*) 
-                FROM `tbl_header` 
-                WHERE `txt_current_file_ref` LIKE "{}" 
+                SELECT COUNT (*)
+                FROM `tbl_header`
+                WHERE `txt_current_file_ref` LIKE "{}"
                 AND `txt_version` LIKE "{}";""".format(current_file_reference,
                                                        version)
 
@@ -237,18 +238,18 @@ class CifExtract:
                     # Attempting to process CIF update out of sequence, cannot continue.
                     if conflicting_version:
                         logging.error('Attempting to process out of sequence CIF, cannot continue...')
-                        return 
+                        return
                     else:
-                        self.cif_record_header = self.cif_db_conn.execute_sql(self.cif_db_conn.format_sql("""INSERT INTO `tbl_header` 
-                                        (`txt_mainframe_id`, 
-                                        `txt_extract_date`, 
-                                        `txt_extract_time`, 
-                                        `txt_current_file_ref`, 
+                        self.cif_record_header = self.cif_db_conn.execute_sql(self.cif_db_conn.format_sql("""INSERT INTO `tbl_header`
+                                        (`txt_mainframe_id`,
+                                        `txt_extract_date`,
+                                        `txt_extract_time`,
+                                        `txt_current_file_ref`,
                                         `txt_last_file_ref`,
                                         `txt_update_indicator`,
                                         `txt_version`,
                                         `txt_start_date`,
-                                        `txt_end_date`) 
+                                        `txt_end_date`)
                                         VALUES ('{}', '{}', '{}', '{}',
                                         '{}', '{}', '{}', '{}', '{}')""".format(mainframe_identity,
                                                                                 date_of_extract,
@@ -261,7 +262,7 @@ class CifExtract:
                                                                                 end_date)), True, last_row=True)
 
                 else:
-                    # Same Reference, Same Version - has already been processed. 
+                    # Same Reference, Same Version - has already been processed.
                     logging.error('Attempting to process same CIF version again; cannot continue...')
                     return
 
@@ -281,11 +282,11 @@ class CifExtract:
                     answer = input('This CIF has already been processed, continue? (YES/NO) ')
                     if answer != 'YES':
                         logging.warning('CIF already processed, user elected to exit')
-                        return 
+                        return
                     else:
                         logging.warning('User elected to re-run CIF, deleting tables')
                         self.db_conn = DBConnection(os.path.join(self.db_directory, self.db_file))
-                        self.db_conn.drop_tables()          
+                        self.db_conn.drop_tables()
             else:
                 # Update CIF - get the current CIF DB reference.
                 db_file = self.cif_db_conn.run_select('SELECT * FROM tbl_current_cif')[0][0]
@@ -295,8 +296,8 @@ class CifExtract:
             # Write a text file that contains the header record information
             if self.full_cif:
                 file_name = 'HEADER.TXT'  # Full CIF
-                fp = os.path.join(self.working_dir, '{}'.format(current_file_reference
-                                                                     ), file_name)
+                fp = os.path.join(self.working_dir,
+                                  '{}'.format(current_file_reference), file_name)
             else:  # Update CIF
                 file_name = '{}.txt'.format(current_file_reference)
                 fp = os.path.join(self.working_dir, file_name)
@@ -305,16 +306,16 @@ class CifExtract:
                 header_file.write(header_text)  # Write HEADER.txt
 
             # Insert the header record into the database table header table.
-            self.db_conn.execute_sql(self.db_conn.format_sql("""INSERT INTO `tbl_header` 
-                                        (`txt_mainframe_id`, 
-                                        `txt_extract_date`, 
-                                        `txt_extract_time`, 
-                                        `txt_current_file_ref`, 
+            self.db_conn.execute_sql(self.db_conn.format_sql("""INSERT INTO `tbl_header`
+                                        (`txt_mainframe_id`,
+                                        `txt_extract_date`,
+                                        `txt_extract_time`,
+                                        `txt_current_file_ref`,
                                         `txt_last_file_ref`,
                                         `txt_update_indicator`,
                                         `txt_version`,
                                         `txt_start_date`,
-                                        `txt_end_date`) 
+                                        `txt_end_date`)
                                         VALUES ('{}', '{}', '{}', '{}',
                                         '{}', '{}', '{}', '{}', '{}')""".format(mainframe_identity,
                                                                                 date_of_extract,
@@ -337,7 +338,7 @@ class CifExtract:
         else:
 
             logging.error('No valid header file found in {}, exiting programme'.format(self.cif_file))
-            return 
+            return
 
         # Full CIF - Update the CIF .db to show which full CIF is being used as the base CIF.
         if self.full_cif:
@@ -350,7 +351,7 @@ class CifExtract:
     def get_tiploc_inserts(self):
 
         """This function parses the TI (TIPLOC INSERT) Records from the CIF and updates the database."""
-
+        self.tiploc_ins_processed_count = 0
         start_time = time.time() # Start the timer
         logging.debug('Parsing TIPLOC INSERT Records...')
         self.db_conn.create_location_table() # Make sure that the db table has been created
@@ -372,20 +373,20 @@ class CifExtract:
 
                 # Format the SQL String
                 self.db_conn.execute_sql("""INSERT INTO `tbl_location` (
-                                            `int_header_id`, 
-                                            `txt_tiploc`, 
-                                            `txt_nlc`, 
-                                            `txt_tps_description`, 
-                                            `txt_stanox`, 
-                                            `txt_alpha`) 
-                                            VALUES 
+                                            `int_header_id`,
+                                            `txt_tiploc`,
+                                            `txt_nlc`,
+                                            `txt_tps_description`,
+                                            `txt_stanox`,
+                                            `txt_alpha`)
+                                            VALUES
                                             ('{}', '{}', '{}', "{}", '{}', '{}')""".format(self.header_row_id,
                                                                                            tiploc,
                                                                                            nlc,
                                                                                            desc,
                                                                                            stanox,
                                                                                            alpha))
-                
+
                 # Each 1000 TIPLOC INSERTS, update the log with a suitable entry.
                 if self.tiploc_ins_processed_count and self.tiploc_ins_processed_count % 1000 == 0:
                     time_now = datetime.datetime.now()
@@ -399,24 +400,26 @@ class CifExtract:
                     logging.debug(
                         'Parsed {}/{} TIPLOC INSERT records in {:.0f} seconds - {} records remaining '
                         '({} HH:MM:SS to complete (ETA: {:%H:%M:%S}))'.format(self.tiploc_ins_processed_count,
-                                                                               self.tot_tiploc_ins_in_cif,
-                                                                               elapsed_seconds,
-                                                                               records_left,
-                                                                               time_left,
-                                                                               est_time_to_complete))
+                                                                              self.tot_tiploc_ins_in_cif,
+                                                                              elapsed_seconds,
+                                                                              records_left,
+                                                                              time_left,
+                                                                              est_time_to_complete))
 
             self.db_conn.get_conn().execute('COMMIT') # Update the database
             end_time = time.time() # Finished processing TI records, Stop the clock
             total_time = (end_time - start_time)
-            
+
             # Give the user a summary
             if total_time <= 59:
                 logging.debug(
-                    'Parsed {}/{} TIPLOC INSERT records in {:.2f} seconds'.format(self.tiploc_ins_processed_count, self.tot_tiploc_ins_in_cif, total_time))
+                    'Parsed {}/{} TIPLOC INSERT records in {:.2f} seconds'.format(self.tiploc_ins_processed_count,
+                                                                                  self.tot_tiploc_ins_in_cif, total_time))
             else:
                 logging.debug(
-                    'Parsed {}/{} TIPLOC INSERT records in {:.2f} MM:SS'.format(self.tiploc_ins_processed_count, self.tot_tiploc_ins_in_cif,
-                                                                           total_time / 60))
+                    'Parsed {}/{} TIPLOC INSERT records in {:.2f} MM:SS'.format(self.tiploc_ins_processed_count,
+                                                                                self.tot_tiploc_ins_in_cif,
+                                                                                total_time / 60))
             logging.debug('{} CIF TIPLOC INSERT records parsed.'.format(self.tiploc_ins_processed_count))
 
         else:  # No TIPLOC INSERT records contained within the CIF
@@ -488,7 +491,7 @@ class CifExtract:
 
             # Suitable log summary entry...
             logging.debug('{}/{} location deletions processed'.format(self.tot_tiploc_del_processed,
-                                                                  self.tot_tiploc_del_in_cif))
+                                                                      self.tot_tiploc_del_in_cif))
         else:
             # There are no TIPLOC DELETE records within the CIF; make a log entry.
             logging.debug('No TIPLOC DELETE records found within {}'.format(self.cif_file))
@@ -580,18 +583,18 @@ class CifExtract:
                 est_time_to_complete = time_now + datetime.timedelta(0, estimated_time_per_record * records_left)
 
                 logging.debug(
-                        'Parsed {}/{} association records in {:.0f} seconds - {} records remaining '
-                        '({} HH:MM:SS to complete (ETA: {:%H:%M:%S}))'.format(self.tot_assoc_records_processed,
-                                                                              self.tot_assoc_records_in_cif,
-                                                                              elapsed_seconds,
-                                                                              records_left,
-                                                                              time_left,
-                                                                              est_time_to_complete))
+                    'Parsed {}/{} association records in {:.0f} seconds - {} records remaining '
+                    '({} HH:MM:SS to complete (ETA: {:%H:%M:%S}))'.format(self.tot_assoc_records_processed,
+                                                                          self.tot_assoc_records_in_cif,
+                                                                          elapsed_seconds,
+                                                                          records_left,
+                                                                          time_left,
+                                                                          est_time_to_complete))
         # Make sure all remaining SQL statements have been processed
         if assoc_string:
             for sql in assoc_string.split(';'):
                 self.db_conn.get_conn().execute(sql)  # process each SQL statement
-            
+
         end_time = time.time()  # Stop the clock - log a summary.
         total_time = (end_time - start_time)
         if total_time <= 59:
@@ -648,24 +651,27 @@ class CifExtract:
         process = subprocess.Popen(['egrep', search_string, self.cif_file], stdout=subprocess.PIPE)
         stdout, stderr = process.communicate()
         schedules = stdout.decode('utf-8')
-               
+
+        # *** Temporary code to see if the RPI memory error can be sorted.
+        with open (os.path.join(CifExtract.TMP_DIR, 'tmp',), 'w+') as f:
+            f.write(schedules)
+            logging.debug(f'{schedule_count} Schedules written to temporary file')
+
         index = self.get_last_row('tbl_basic_schedule')  # Get the last row within the table.
-
         start_time = time.time()  # Start the clock on the timer.
-
         sql_string = ""
-        for line in schedules.splitlines():  # Iterate through each schedule line.
+
+        for line in open (os.path.join(CifExtract.TMP_DIR, 'tmp')):
             if re.match('^BS', line):  # Basic Schedule match
                 index += 1  # Increment the index.
                 total_processed += 1  # Show the processed tally +1
 
                 # This ensures that we only commit to the database every 1000 records.
-                if index % 1000 == 0:
+                if index % 10000 == 0:
                     if sql_string != "":
                         for stat in sql_string.split(';'):
                             self.db_conn.get_conn().execute(stat)
                         self.db_conn.get_conn().execute('COMMIT')
-
                         sql_string = ""
 
                         # Calculate how we are doing - log an entry to the log.
@@ -675,17 +681,16 @@ class CifExtract:
                         estimated_time_per_record = elapsed_seconds / total_processed
                         records_left = int(schedule_count) - total_processed
                         time_left = str(datetime.timedelta(seconds=(estimated_time_per_record * records_left))).split('.')[0]
-                        est_time_to_complete = time_now + datetime.timedelta(0,
-                                                             estimated_time_per_record * records_left)
+                        est_time_to_complete = time_now + datetime.timedelta(0, estimated_time_per_record * records_left)
 
                         logging.debug(
                             'Parsed {}/{} schedule records in {:.0f} seconds - {} records remaining '
                             '({} HH:MM:SS to complete (ETA: {:%H:%M:%S}))'.format(total_processed,
-                                                                                      schedule_count,
-                                                                                      elapsed_seconds,
-                                                                                      records_left,
-                                                                                      time_left,
-                                                                                      est_time_to_complete))
+                                                                                  schedule_count,
+                                                                                  elapsed_seconds,
+                                                                                  records_left,
+                                                                                  time_left,
+                                                                                  est_time_to_complete))
                 sql_string += self.db_conn.insert_basic_schedule(self.header_row_id, self.db_conn.parse_basic_schedule(line))
 
             if re.match('^LO', line): # Origin record
@@ -728,7 +733,7 @@ class CifExtract:
         UPDATE `tbl_header`
         SET `int_complete` = 1
         WHERE `int_record_id` = {};
-        
+
         """.format(self.cif_record_header)
         self.cif_db_conn.execute_sql(sql_string, True)
 
@@ -770,4 +775,4 @@ class CifExtract:
 
 if __name__ == "__main__":
 
-    cif_extract = CifExtract(args)
+    cif_extract = CifExtract(ARGS)
